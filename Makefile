@@ -3,7 +3,7 @@ BUILD_DIR = .build
 EXECUTABLE = clipslots
 DEV_CERT = ClipSlots-Dev
 
-.PHONY: all build build-debug clean run install setup-cert
+.PHONY: all build build-debug clean run install setup-cert site
 
 all: build
 
@@ -65,3 +65,6 @@ install: build
 	@echo "Installing to /usr/local/bin..."
 	@sudo cp $(BUILD_DIR)/release/$(EXECUTABLE) /usr/local/bin/
 	@echo "Installed successfully"
+
+site:
+	open docs/index.html
