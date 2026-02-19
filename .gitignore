@@ -1,0 +1,18 @@
+# Swift Package Manager
+.build/
+Package.resolved
+
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+
+# macOS
+.DS_Store
+
+# Claude Code
+.claude/
+
+# Editor
+*.swp
+*~
