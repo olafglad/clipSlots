@@ -25,6 +25,7 @@ struct Status: ParsableCommand {
         print("Accessible:  \(accessible ? "Yes" : "No (hotkeys won't work)")")
         print("Pasteboard:  \(clipboard.permissionStatus.description)")
         print("Slots:       \(config.slots)")
+        print("Logging:     \(config.verbose ? "on" : "off") (change in 'clipslots config --edit')")
         print("")
         print("Keybinds:")
         print("  Save:      \(config.keybinds.save)")

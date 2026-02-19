@@ -78,12 +78,18 @@ class ConfigManager {
 slots = 5
 
 # Show daemon logs in terminal (true/false)
+# Logs save/paste actions, startup info, errors, etc.
 verbose = true
 
 # Keybind configuration
-# Modifiers: ctrl, option, cmd, shift
-# Keys: 1-9, 0, a-z, f1-f12
-# Use {n} as placeholder for slot number
+# Use {n} as placeholder for the slot number
+#
+# Available modifiers: ctrl, option, cmd, shift
+# Available keys: 0-9, a-z, f1-f12
+#
+# Examples:
+#   "ctrl+option+{n}"   → Ctrl+Option+1 for slot 1
+#   "cmd+shift+{n}"     → Cmd+Shift+1 for slot 1
 [keybinds]
 save = "ctrl+option+{n}"
 paste = "ctrl+{n}"
