@@ -21,6 +21,22 @@ struct Paths {
         dataDirectory.appendingPathComponent("slots.json")
     }
 
+    static var slotsDirectory: URL {
+        dataDirectory.appendingPathComponent("slots")
+    }
+
+    static var manifestFile: URL {
+        slotsDirectory.appendingPathComponent("manifest.json")
+    }
+
+    static func slotDirectory(_ slot: Int) -> URL {
+        slotsDirectory.appendingPathComponent(String(slot))
+    }
+
+    static func slotItemDirectory(_ slot: Int, itemIndex: Int) -> URL {
+        slotDirectory(slot).appendingPathComponent("item_\(itemIndex)")
+    }
+
     static var launchAgentDirectory: URL {
         homeDirectory.appendingPathComponent("Library/LaunchAgents")
     }

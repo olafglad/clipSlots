@@ -3,6 +3,7 @@ import TOMLDecoder
 
 struct Config: Codable {
     var slots: Int = 5
+    var verbose: Bool = true
     var keybinds: Keybinds = Keybinds()
 
     struct Keybinds: Codable {
@@ -75,6 +76,9 @@ class ConfigManager {
 
 # Number of slots (1-10)
 slots = 5
+
+# Show daemon logs in terminal (true/false)
+verbose = true
 
 # Keybind configuration
 # Modifiers: ctrl, option, cmd, shift

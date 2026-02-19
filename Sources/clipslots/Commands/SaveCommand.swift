@@ -23,15 +23,11 @@ struct Save: ParsableCommand {
             throw ClipboardError.permissionDenied
         }
 
-        guard let content = clipboard.getCurrentContent() else {
+        guard let content = clipboard.captureAll() else {
             throw ClipboardError.emptyClipboard
         }
 
         try storage.setSlot(slot, content: content)
-
-        let preview = content.count > 50
-            ? String(content.prefix(47)) + "..."
-            : content
-        print("Saved to slot \(slot): \"\(preview.replacingOccurrences(of: "\n", with: " "))\"")
+        print("Saved to slot \(slot): \(content.contentDescription)")
     }
 }

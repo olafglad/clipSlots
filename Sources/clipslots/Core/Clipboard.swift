@@ -36,6 +36,42 @@ class Clipboard {
         return pasteboard.setString(content, forType: .string)
     }
 
+    func captureAll() -> SlotContent? {
+        guard permissionStatus.isUsable else { return nil }
+        guard let items = pasteboard.pasteboardItems, !items.isEmpty else { return nil }
+
+        var snapshots: [PasteboardItemSnapshot] = []
+        for item in items {
+            var representations: [PasteboardRepresentation] = []
+            for type in item.types {
+                if let data = item.data(forType: type) {
+                    representations.append(PasteboardRepresentation(typeString: type.rawValue, data: data))
+                }
+            }
+            if !representations.isEmpty {
+                snapshots.append(PasteboardItemSnapshot(representations: representations))
+            }
+        }
+
+        guard !snapshots.isEmpty else { return nil }
+        return SlotContent(items: snapshots)
+    }
+
+    func restoreAll(_ content: SlotContent) -> Bool {
+        guard permissionStatus.isUsable else { return false }
+        pasteboard.clearContents()
+
+        for itemSnapshot in content.items {
+            let item = NSPasteboardItem()
+            for rep in itemSnapshot.representations {
+                item.setData(rep.data, forType: NSPasteboard.PasteboardType(rep.typeString))
+            }
+            pasteboard.writeObjects([item])
+        }
+
+        return true
+    }
+
     var isEmpty: Bool {
         getCurrentContent()?.isEmpty ?? true
     }

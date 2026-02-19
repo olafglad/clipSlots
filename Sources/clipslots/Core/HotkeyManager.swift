@@ -27,7 +27,7 @@ class HotkeyManager {
             }
         }
 
-        print("Registered \(hotkeys.count) hotkeys for \(config.slots) slots")
+        log("Registered \(hotkeys.count) hotkeys for \(config.slots) slots")
     }
 
     func unregisterAll() {
@@ -59,49 +59,53 @@ class HotkeyManager {
     }
 
     private func handleSave(slot: Int) {
-        let originalContent = clipboard.getCurrentContent()
+        let originalContent = clipboard.captureAll()
         let originalChangeCount = NSPasteboard.general.changeCount
 
         simulateKeyPress(key: CGKeyCode(8), flags: .maskCommand) // Cmd+C
         usleep(100_000)
 
         let newChangeCount = NSPasteboard.general.changeCount
-        guard newChangeCount != originalChangeCount,
-              let content = clipboard.getCurrentContent(), !content.isEmpty else {
+        let content: SlotContent
+        if newChangeCount != originalChangeCount,
+           let freshContent = clipboard.captureAll(), !freshContent.isEmpty {
+            // Cmd+C grabbed a new selection
+            content = freshContent
+        } else if let existing = originalContent, !existing.isEmpty {
+            // Nothing new from Cmd+C — save whatever was already on the clipboard
+            content = existing
+        } else {
             if !AXIsProcessTrusted() {
-                print("[\(timestamp())] Save slot \(slot): no Accessibility permission")
+                log("[\(timestamp())] Save slot \(slot): no Accessibility permission")
             } else {
-                print("[\(timestamp())] Save slot \(slot): nothing selected")
-            }
-            if let original = originalContent {
-                _ = clipboard.setContent(original)
+                log("[\(timestamp())] Save slot \(slot): clipboard is empty")
             }
             return
         }
 
         do {
             try storage.setSlot(slot, content: content)
-            let preview = formatPreview(content)
-            print("[\(timestamp())] Saved to slot \(slot): \"\(preview)\"")
+            log("[\(timestamp())] Saved to slot \(slot): \(content.contentDescription)")
 
-            if let original = originalContent {
-                _ = clipboard.setContent(original)
+            // Restore original clipboard only if we changed it with Cmd+C
+            if newChangeCount != originalChangeCount, let original = originalContent {
+                _ = clipboard.restoreAll(original)
             }
         } catch {
-            print("[\(timestamp())] Error saving to slot \(slot): \(error.localizedDescription)")
+            log("[\(timestamp())] Error saving to slot \(slot): \(error.localizedDescription)")
         }
     }
 
     private func handlePaste(slot: Int) {
-        guard let content = storage.getSlot(slot), !content.isEmpty else {
-            print("[\(timestamp())] Paste slot \(slot): empty")
+        guard let content = storage.getSlot(slot) else {
+            log("[\(timestamp())] Paste slot \(slot): empty")
             return
         }
 
-        let originalContent = clipboard.getCurrentContent()
+        let originalContent = clipboard.captureAll()
 
-        guard clipboard.setContent(content) else {
-            print("[\(timestamp())] Error pasting slot \(slot): failed to set clipboard")
+        guard clipboard.restoreAll(content) else {
+            log("[\(timestamp())] Error pasting slot \(slot): failed to set clipboard")
             return
         }
 
@@ -109,19 +113,18 @@ class HotkeyManager {
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
             if let original = originalContent {
-                _ = self?.clipboard.setContent(original)
+                _ = self?.clipboard.restoreAll(original)
             }
         }
 
-        let preview = formatPreview(content)
-        print("[\(timestamp())] Pasted slot \(slot): \"\(preview)\"")
+        log("[\(timestamp())] Pasted slot \(slot): \(content.contentDescription)")
     }
 
     private func simulateKeyPress(key: CGKeyCode, flags: CGEventFlags) {
         let source = CGEventSource(stateID: .hidSystemState)
         guard let keyDown = CGEvent(keyboardEventSource: source, virtualKey: key, keyDown: true),
               let keyUp = CGEvent(keyboardEventSource: source, virtualKey: key, keyDown: false) else {
-            print("[\(timestamp())] Error: could not create CGEvent")
+            log("[\(timestamp())] Error: could not create CGEvent")
             return
         }
         keyDown.flags = flags
@@ -130,9 +133,9 @@ class HotkeyManager {
         keyUp.post(tap: .cghidEventTap)
     }
 
-    private func formatPreview(_ content: String) -> String {
-        let preview = content.count > 40 ? String(content.prefix(37)) + "..." : content
-        return preview.replacingOccurrences(of: "\n", with: " ")
+    private func log(_ message: String) {
+        guard config.verbose else { return }
+        print(message)
     }
 
     private func timestamp() -> String {

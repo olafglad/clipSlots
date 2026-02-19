@@ -23,17 +23,14 @@ struct Paste: ParsableCommand {
             throw ClipboardError.permissionDenied
         }
 
-        guard let content = storage.getSlot(slot), !content.isEmpty else {
+        guard let content = storage.getSlot(slot) else {
             throw ValidationError("Slot \(slot) is empty. Save something first with 'clipslots save \(slot)'.")
         }
 
-        guard clipboard.setContent(content) else {
+        guard clipboard.restoreAll(content) else {
             throw ClipboardError.failedToSet
         }
 
-        let preview = content.count > 50
-            ? String(content.prefix(47)) + "..."
-            : content
-        print("Slot \(slot) copied to clipboard: \"\(preview.replacingOccurrences(of: "\n", with: " "))\"")
+        print("Slot \(slot) copied to clipboard: \(content.contentDescription)")
     }
 }

@@ -12,12 +12,17 @@ struct Daemon: ParsableCommand {
     mutating func run() throws {
         setbuf(stdout, nil)
 
-        print("ClipSlots daemon starting at \(ISO8601DateFormatter().string(from: Date()))")
-
         let config = try ConfigManager.load()
-        print("Config loaded: \(config.slots) slots")
-        print("Save keybind: \(config.keybinds.save)")
-        print("Paste keybind: \(config.keybinds.paste)")
+
+        func log(_ message: String) {
+            guard config.verbose else { return }
+            print(message)
+        }
+
+        log("ClipSlots daemon starting at \(ISO8601DateFormatter().string(from: Date()))")
+        log("Config loaded: \(config.slots) slots")
+        log("Save keybind: \(config.keybinds.save)")
+        log("Paste keybind: \(config.keybinds.paste)")
 
         // Check Accessibility permission (required for CGEvent posting)
         let trusted = AXIsProcessTrustedWithOptions(
@@ -53,7 +58,7 @@ struct Daemon: ParsableCommand {
         }
         sigtermSource.resume()
 
-        print("Daemon ready. Listening for hotkeys...")
+        log("Daemon ready. Listening for hotkeys...")
 
         let app = NSApplication.shared
         app.setActivationPolicy(.accessory)

@@ -1,142 +1,225 @@
 import Foundation
 
-struct SlotData: Codable {
-    var slots: [String: String?] = [:]
-    var updatedAt: Date = Date()
-
-    init(slotCount: Int) {
-        for i in 1...slotCount {
-            slots[String(i)] = nil
-        }
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        slots = try container.decode([String: String?].self, forKey: .slots)
-
-        if let dateString = try? container.decode(String.self, forKey: .updatedAt) {
-            updatedAt = ISO8601DateFormatter().date(from: dateString) ?? Date()
-        } else {
-            updatedAt = Date()
-        }
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(slots, forKey: .slots)
-        try container.encode(ISO8601DateFormatter().string(from: updatedAt), forKey: .updatedAt)
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case slots
-        case updatedAt = "updated_at"
-    }
-
-    func getSlot(_ slotNumber: Int) -> String? {
-        slots[String(slotNumber)] ?? nil
-    }
-
-    mutating func setSlot(_ slotNumber: Int, content: String?) {
-        slots[String(slotNumber)] = content
-        updatedAt = Date()
-    }
-
-    mutating func clearSlot(_ slotNumber: Int) {
-        slots[String(slotNumber)] = nil
-        updatedAt = Date()
-    }
-
-    mutating func clearAll() {
-        for key in slots.keys {
-            slots[key] = nil
-        }
-        updatedAt = Date()
-    }
-
-    func isSlotEmpty(_ slotNumber: Int) -> Bool {
-        let content = slots[String(slotNumber)] ?? nil
-        return content == nil || content?.isEmpty == true
-    }
-
-    mutating func adjustSlotCount(to newCount: Int) {
-        for num in slots.keys.compactMap({ Int($0) }) where num > newCount {
-            slots.removeValue(forKey: String(num))
-        }
-        for i in 1...newCount {
-            if slots[String(i)] == nil {
-                slots[String(i)] = nil
-            }
-        }
-        updatedAt = Date()
-    }
-}
-
 class SlotStorage {
-    private let fileURL = Paths.slotsFile
-    private var data: SlotData
+    private let slotCount: Int
+    private let fm = FileManager.default
 
     init(slotCount: Int) throws {
-        try Paths.ensureDirectoryExists(at: Paths.dataDirectory)
+        self.slotCount = slotCount
+        try Paths.ensureDirectoryExists(at: Paths.slotsDirectory)
+        cleanupTempDirectories()
+        try migrateIfNeeded()
+    }
 
-        if FileManager.default.fileExists(atPath: fileURL.path) {
-            do {
-                let jsonData = try Data(contentsOf: fileURL)
-                var loadedData = try JSONDecoder().decode(SlotData.self, from: jsonData)
-                loadedData.adjustSlotCount(to: slotCount)
-                self.data = loadedData
-                try save()
-            } catch {
-                print("Warning: Could not load slots file, creating new one: \(error.localizedDescription)")
-                self.data = SlotData(slotCount: slotCount)
-                try save()
-            }
-        } else {
-            self.data = SlotData(slotCount: slotCount)
-            try save()
+    // MARK: - Public API
+
+    func getSlot(_ slotNumber: Int) -> SlotContent? {
+        let slotDir = Paths.slotDirectory(slotNumber)
+        guard fm.fileExists(atPath: slotDir.path) else { return nil }
+
+        var items: [PasteboardItemSnapshot] = []
+        guard let itemDirs = try? fm.contentsOfDirectory(at: slotDir, includingPropertiesForKeys: nil)
+            .filter({ $0.lastPathComponent.hasPrefix("item_") })
+            .sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) else {
+            return nil
         }
+
+        for itemDir in itemDirs {
+            var representations: [PasteboardRepresentation] = []
+            guard let files = try? fm.contentsOfDirectory(at: itemDir, includingPropertiesForKeys: nil)
+                .filter({ $0.pathExtension == "bin" }) else {
+                continue
+            }
+            for file in files {
+                let typeString = decodeTypeName(file.deletingPathExtension().lastPathComponent)
+                if let data = try? Data(contentsOf: file) {
+                    representations.append(PasteboardRepresentation(typeString: typeString, data: data))
+                }
+            }
+            if !representations.isEmpty {
+                items.append(PasteboardItemSnapshot(representations: representations))
+            }
+        }
+
+        guard !items.isEmpty else { return nil }
+        return SlotContent(items: items)
     }
 
-    func save() throws {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        let jsonData = try encoder.encode(data)
-        try jsonData.write(to: fileURL, options: .atomic)
-    }
+    func setSlot(_ slotNumber: Int, content: SlotContent) throws {
+        let slotDir = Paths.slotDirectory(slotNumber)
+        let tempDir = Paths.slotsDirectory.appendingPathComponent(".tmp_\(slotNumber)_\(ProcessInfo.processInfo.processIdentifier)")
 
-    func getSlot(_ slotNumber: Int) -> String? {
-        data.getSlot(slotNumber)
-    }
+        // Write to temp directory first
+        try fm.createDirectory(at: tempDir, withIntermediateDirectories: true)
 
-    func setSlot(_ slotNumber: Int, content: String?) throws {
-        data.setSlot(slotNumber, content: content)
-        try save()
+        do {
+            for (itemIndex, item) in content.items.enumerated() {
+                let itemDir = tempDir.appendingPathComponent("item_\(itemIndex)")
+                try fm.createDirectory(at: itemDir, withIntermediateDirectories: true)
+
+                for rep in item.representations {
+                    let fileName = encodeTypeName(rep.typeString) + ".bin"
+                    let filePath = itemDir.appendingPathComponent(fileName)
+                    try rep.data.write(to: filePath)
+                }
+            }
+
+            // Atomic swap: remove old, rename temp into place
+            if fm.fileExists(atPath: slotDir.path) {
+                try fm.removeItem(at: slotDir)
+            }
+            try fm.moveItem(at: tempDir, to: slotDir)
+
+            try updateManifest()
+        } catch {
+            // Cleanup temp on failure
+            try? fm.removeItem(at: tempDir)
+            throw error
+        }
     }
 
     func clearSlot(_ slotNumber: Int) throws {
-        data.clearSlot(slotNumber)
-        try save()
+        let slotDir = Paths.slotDirectory(slotNumber)
+        if fm.fileExists(atPath: slotDir.path) {
+            try fm.removeItem(at: slotDir)
+        }
+        try updateManifest()
     }
 
     func clearAll() throws {
-        data.clearAll()
-        try save()
+        for i in 1...slotCount {
+            let slotDir = Paths.slotDirectory(i)
+            if fm.fileExists(atPath: slotDir.path) {
+                try fm.removeItem(at: slotDir)
+            }
+        }
+        try updateManifest()
     }
 
     func isSlotEmpty(_ slotNumber: Int) -> Bool {
-        data.isSlotEmpty(slotNumber)
+        let slotDir = Paths.slotDirectory(slotNumber)
+        return !fm.fileExists(atPath: slotDir.path)
     }
 
-    func getAllSlots() -> [Int: String?] {
-        var result: [Int: String?] = [:]
-        for (key, value) in data.slots {
-            if let slotNumber = Int(key) {
-                result[slotNumber] = value
-            }
+    func getAllSlots() -> [Int: SlotContent?] {
+        var result: [Int: SlotContent?] = [:]
+        for i in 1...slotCount {
+            result[i] = getSlot(i)
         }
         return result
     }
 
+    func getManifest() -> Manifest? {
+        guard let data = try? Data(contentsOf: Paths.manifestFile) else { return nil }
+        return try? JSONDecoder().decode(Manifest.self, from: data)
+    }
+
     func getMaxSlot() -> Int {
-        data.slots.keys.compactMap { Int($0) }.max() ?? 5
+        slotCount
+    }
+
+    // MARK: - Manifest
+
+    private func updateManifest() throws {
+        var entries: [ManifestEntry] = []
+        let formatter = ISO8601DateFormatter()
+
+        for i in 1...slotCount {
+            guard let content = getSlot(i) else { continue }
+            let allTypes = Array(Set(content.items.flatMap { $0.representations.map { $0.typeString } }))
+            let totalBytes = content.items.flatMap { $0.representations }.reduce(0) { $0 + $1.data.count }
+
+            entries.append(ManifestEntry(
+                slot: i,
+                description: content.contentDescription,
+                types: allTypes,
+                totalBytes: totalBytes,
+                itemCount: content.items.count,
+                updatedAt: formatter.string(from: Date())
+            ))
+        }
+
+        let manifest = Manifest(entries: entries)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        let data = try encoder.encode(manifest)
+        try data.write(to: Paths.manifestFile, options: .atomic)
+    }
+
+    // MARK: - Filename Encoding
+
+    private func encodeTypeName(_ typeString: String) -> String {
+        typeString.replacingOccurrences(of: "/", with: "_SLASH_")
+    }
+
+    private func decodeTypeName(_ fileName: String) -> String {
+        fileName.replacingOccurrences(of: "_SLASH_", with: "/")
+    }
+
+    // MARK: - Migration
+
+    private func migrateIfNeeded() throws {
+        let oldFile = Paths.slotsFile
+        guard fm.fileExists(atPath: oldFile.path) else { return }
+
+        // Inline old SlotData for deserialization
+        struct OldSlotData: Codable {
+            var slots: [String: String?] = [:]
+            var updatedAt: Date = Date()
+
+            enum CodingKeys: String, CodingKey {
+                case slots
+                case updatedAt = "updated_at"
+            }
+
+            init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                slots = try container.decode([String: String?].self, forKey: .slots)
+                if let dateString = try? container.decode(String.self, forKey: .updatedAt) {
+                    updatedAt = ISO8601DateFormatter().date(from: dateString) ?? Date()
+                } else {
+                    updatedAt = Date()
+                }
+            }
+        }
+
+        do {
+            let jsonData = try Data(contentsOf: oldFile)
+            let oldData = try JSONDecoder().decode(OldSlotData.self, from: jsonData)
+
+            for (key, value) in oldData.slots {
+                guard let slotNum = Int(key), let text = value, !text.isEmpty else { continue }
+                let textData = Data(text.utf8)
+                let rep = PasteboardRepresentation(
+                    typeString: "public.utf8-plain-text",
+                    data: textData
+                )
+                let item = PasteboardItemSnapshot(representations: [rep])
+                let content = SlotContent(items: [item])
+                try setSlot(slotNum, content: content)
+            }
+
+            // Rename old file to .bak
+            let backupFile = oldFile.deletingPathExtension().appendingPathExtension("json.bak")
+            if fm.fileExists(atPath: backupFile.path) {
+                try fm.removeItem(at: backupFile)
+            }
+            try fm.moveItem(at: oldFile, to: backupFile)
+
+            print("Migrated slots from old format. Backup saved to \(backupFile.path)")
+        } catch {
+            print("Warning: Could not migrate old slots file: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Cleanup
+
+    private func cleanupTempDirectories() {
+        guard let contents = try? fm.contentsOfDirectory(at: Paths.slotsDirectory, includingPropertiesForKeys: nil) else {
+            return
+        }
+        for item in contents where item.lastPathComponent.hasPrefix(".tmp_") {
+            try? fm.removeItem(at: item)
+        }
     }
 }
