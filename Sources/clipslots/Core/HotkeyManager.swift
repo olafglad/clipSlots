@@ -5,14 +5,21 @@ import Carbon
 
 class HotkeyManager {
     private var hotkeys: [HotKey] = []
-    private let storage: SlotStorage
+    private var storage: SlotStorage
     private let clipboard: Clipboard
-    private let config: Config
+    private(set) var config: Config
 
     init(config: Config, storage: SlotStorage, clipboard: Clipboard) {
         self.config = config
         self.storage = storage
         self.clipboard = clipboard
+    }
+
+    func reload(config newConfig: Config, storage newStorage: SlotStorage) {
+        self.config = newConfig
+        self.storage = newStorage
+        registerHotkeys()
+        log("[\(timestamp())] Config reloaded: \(newConfig.slots) slots, save=\(newConfig.keybinds.save), paste=\(newConfig.keybinds.paste)")
     }
 
     func registerHotkeys() {
