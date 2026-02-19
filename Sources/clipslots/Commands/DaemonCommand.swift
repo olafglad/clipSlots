@@ -102,8 +102,25 @@ class ConfigFileWatcher {
     }
 
     func start() {
+        watch()
+    }
+
+    func stop() {
+        source?.cancel()
+        source = nil
+    }
+
+    private func watch() {
+        source?.cancel()
+
         let fd = open(configURL.path, O_EVTONLY)
-        guard fd >= 0 else { return }
+        guard fd >= 0 else {
+            // File may not exist yet — poll until it does
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                self?.watch()
+            }
+            return
+        }
 
         let source = DispatchSource.makeFileSystemObjectSource(
             fileDescriptor: fd,
@@ -112,7 +129,13 @@ class ConfigFileWatcher {
         )
 
         source.setEventHandler { [weak self] in
-            self?.onChange()
+            guard let self = self else { return }
+            // Small delay — editors may write then rename in quick succession
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                self.onChange()
+                // Re-watch: the inode likely changed after a save-and-replace
+                self.watch()
+            }
         }
 
         source.setCancelHandler {
@@ -121,10 +144,5 @@ class ConfigFileWatcher {
 
         source.resume()
         self.source = source
-    }
-
-    func stop() {
-        source?.cancel()
-        source = nil
     }
 }
