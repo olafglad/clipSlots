@@ -18,9 +18,11 @@
   <meta name="twitter:description" content="Save, switch, and paste clipboard slots with global hotkeys. A lightweight CLI tool for macOS." />
 
   <!-- Favicon and icons -->
-  <link rel="icon" href="images/favicon/favicon.png" sizes="32x32" />
-  <link rel="icon" href="images/favicon/icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="images/favicon/apple-touch-icon.png" />
+  <link rel="icon" href="images/favicon/favicon.ico" sizes="16x16 32x32 48x48 256x256" />
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="256x256" href="images/favicon/favicon-256x256.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="images/favicon/favicon-512.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="images/favicon/apple-touch-icon.png" />
 
   <!-- Preload fonts -->
   <link rel="preload" href="fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin />
@@ -83,7 +85,10 @@
             </a>
           </div>
         </div>
-        <!-- Terminal demo placeholder -->
+        <div class="mascot-container">
+          <img src="images/mascot.png" width="220" height="220" alt="ClipSlots mascot — a purple octopus holding numbered clipboards" class="mascot-hero" />
+        </div>
+        <!-- Terminal demo -->
         <div class="image-wide">
           <div class="terminal-demo">
             <div class="terminal-bar">
@@ -226,15 +231,15 @@ clipslots start" aria-label="Copy to clipboard">
                 <span class="copy-label">Copy</span>
               </button>
             </div>
-            <pre style="margin: 0; color: #e6edf3"><code><span class="line"><span style="color:#8B949E"># Clone and build</span></span>
-<span class="line"><span style="color:#79C0FF">git clone</span> <span style="color:#A5D6FF">https://github.com/olafglad/clipSlots.git</span></span>
-<span class="line"><span style="color:#79C0FF">cd</span> <span style="color:#A5D6FF">clipSlots</span></span>
-<span class="line"><span style="color:#79C0FF">swift build</span> <span style="color:#A5D6FF">-c release</span></span>
-<span class="line"><span style="color:#79C0FF">cp</span> <span style="color:#A5D6FF">.build/release/clipslots /usr/local/bin/</span></span>
+            <pre style="margin: 0; color: #C9BFD9"><code><span class="line"><span style="color:#7B6A96"># Clone and build</span></span>
+<span class="line"><span style="color:#7DDFB0">git clone</span> <span style="color:#B088D0">https://github.com/olafglad/clipSlots.git</span></span>
+<span class="line"><span style="color:#7DDFB0">cd</span> <span style="color:#B088D0">clipSlots</span></span>
+<span class="line"><span style="color:#7DDFB0">swift build</span> <span style="color:#B088D0">-c release</span></span>
+<span class="line"><span style="color:#7DDFB0">cp</span> <span style="color:#B088D0">.build/release/clipslots /usr/local/bin/</span></span>
 <span class="line"></span>
-<span class="line"><span style="color:#8B949E"># Set up and run</span></span>
-<span class="line"><span style="color:#79C0FF">clipslots</span> <span style="color:#A5D6FF">permissions</span></span>
-<span class="line"><span style="color:#79C0FF">clipslots</span> <span style="color:#A5D6FF">start</span></span></code></pre>
+<span class="line"><span style="color:#7B6A96"># Set up and run</span></span>
+<span class="line"><span style="color:#7DDFB0">clipslots</span> <span style="color:#B088D0">permissions</span></span>
+<span class="line"><span style="color:#7DDFB0">clipslots</span> <span style="color:#B088D0">start</span></span></code></pre>
           </div>
         </div>
       </section>

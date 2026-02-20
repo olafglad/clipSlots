@@ -28,8 +28,8 @@
   - Saturation controls how much of accent color will be mixed into text, background, and surface colors.
   - Contrast controls how contrast the text colors will be.
   */
-  --theme-hue: 160;
-  --theme-saturation: 0.25; /* 0...1 where 0 means grayscale colors; 1 means fully saturated colors */
+  --theme-hue: 300;
+  --theme-saturation: 0.3; /* 0...1 where 0 means grayscale colors; 1 means fully saturated colors */
   --theme-contrast: 0.85; /* 0...1 where 0 means low contrast; 1 means high contrast, black-n-white in fact */
 
   /* Fonts */
@@ -150,52 +150,28 @@
 .theme-dark {
   color-scheme: dark;
 
-  /** Base color
-  By default it's blue ≈ #0289ff
-  Usually it's your brand color. Simply provide your value and the whole theme will be recalculated automatically.
-  Default value is in OKLCH because it produces richer P3 colors, however you can use any color format. 
-   */
-  /* --colors-accent: #00bc81; */
-  --color-accent: oklch(0.53 0.22 var(--theme-hue));
+  /* ClipSlots brand palette — purple body + mint green accent */
+  --color-accent: #7DDFB0;
+  --color-accent-hover: #93E8BF;
+  --color-accent-b: rgba(125, 223, 176, 0.16);
+  --color-accent-b-hover: rgba(125, 223, 176, 0.24);
 
-  /* Relative colors 
-  These colors are calculated based on the accent color and saturation/contrast values.
-  Feel free to provide exact values if you want to override them.
-  */
-  --color-background-l: calc(0.35 - 0.35 * pow(var(--theme-contrast), 4));
-  --color-background: oklch(
-    from var(--color-accent) var(--color-background-l)
-      calc(var(--color-background-l) * 0.3 * var(--theme-saturation)) h
-  );
-  --color-background-blur: oklch(from var(--color-background) l c h / 0.9);
+  --color-background: #1E1430;
+  --color-background-blur: rgba(30, 20, 48, 0.92);
+  --color-text-primary: #F0EBF5;
+  --color-text-secondary: rgba(240, 235, 245, 0.65);
+  --color-text-tertiary: rgba(240, 235, 245, 0.42);
 
-  --color-text-primary-l: calc(0.7 + 0.3 * pow(var(--theme-contrast), 0.8));
-  --color-text-primary: oklch(
-    from var(--color-accent) var(--color-text-primary-l)
-      calc((1 - var(--color-text-primary-l)) * 0.6 * var(--theme-saturation)) h
-  );
+  --color-surface: rgba(240, 235, 245, 0.05);
+  --color-on-accent: #1E1430;
+  --color-border-level-2: rgba(240, 235, 245, 0.08);
+  --color-border-level-3: rgba(240, 235, 245, 0.16);
 
-  --color-text-secondary: oklch(from var(--color-text-primary) l c h / 0.7);
-  --color-text-tertiary: oklch(from var(--color-text-primary) l c h / 0.5);
-  --color-accent-hover: oklch(from var(--color-accent) calc(l + 0.05) c h);
-  --color-accent-b: oklch(from var(--color-accent) l c h / 0.16);
-  --color-accent-b-hover: oklch(
-    from var(--color-accent-border) calc(l + 0.1) c h
-  );
+  --color-gradient-bg-start: rgba(139, 95, 191, 0.25);
+  --color-gradient-bg-end: rgba(139, 95, 191, 0);
 
-  --color-surface: oklch(from var(--color-text-primary) l c h / 0.04);
-  --color-on-accent: white;
-  --color-border-level-2: oklch(from var(--color-text-primary) l c h / 0.08);
-  --color-border-level-3: oklch(from var(--color-text-primary) l c h / 0.16);
-
-  --color-gradient-bg-start: oklch(
-    from var(--color-accent) l calc(0.3 * pow(var(--theme-saturation), 0.5)) h /
-      calc(0.5 - 0.5 * pow(var(--theme-contrast), 2))
-  );
-  --color-gradient-bg-end: oklch(from var(--color-gradient-bg-start) l c h / 0);
-
-  --color-gradient-promo-start: #800069;
-  --color-gradient-promo-end: #005196;
+  --color-gradient-promo-start: #6B4D8A;
+  --color-gradient-promo-end: #8B5FBF;
 }
 
 .page-container {
@@ -719,7 +695,7 @@ section {
   overflow: auto;
 
   &.dark {
-    background-color: #2b2b2b;
+    background-color: #17112A;
   }
 }
 
@@ -828,13 +804,30 @@ section {
   letter-spacing: -0.5px;
 }
 
+/* Mascot */
+
+.mascot-container {
+  display: flex;
+  justify-content: center;
+  margin: -12px 0 8px;
+}
+
+.mascot-hero {
+  filter: drop-shadow(0 8px 32px rgba(139, 95, 191, 0.35));
+  transition: transform 0.3s ease;
+}
+
+.mascot-hero:hover {
+  transform: scale(1.05) rotate(-3deg);
+}
+
 /* Terminal demo */
 
 .terminal-demo {
   border: 1px solid var(--color-border-level-3);
   border-radius: var(--radius-l);
   overflow: hidden;
-  background-color: #1a1b26;
+  background-color: #17112A;
 }
 
 .terminal-bar {
@@ -842,8 +835,8 @@ section {
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background-color: #16171f;
-  border-bottom: 1px solid #2a2b3d;
+  background-color: #130E22;
+  border-bottom: 1px solid #2E2347;
 }
 
 .terminal-dot {
@@ -859,7 +852,7 @@ section {
 .terminal-title {
   font-family: var(--font-mono);
   font-size: var(--font-size-s);
-  color: #565f89;
+  color: #6B5490;
   margin-left: auto;
   margin-right: auto;
 }
@@ -874,20 +867,20 @@ section {
 
 .terminal-body pre {
   margin: 0;
-  color: #a9b1d6;
+  color: #C9BFD9;
 }
 
 .terminal-prompt {
-  color: #7aa2f7;
+  color: #B088D0;
   user-select: none;
 }
 
 .terminal-cmd {
-  color: #9ece6a;
+  color: #7DDFB0;
 }
 
 .terminal-output {
-  color: #787c99;
+  color: #7B6A96;
 }
 
 /* Install steps */
@@ -928,13 +921,13 @@ section {
   align-items: center;
   padding-bottom: 12px;
   margin-bottom: 12px;
-  border-bottom: 1px solid #3a3a4a;
+  border-bottom: 1px solid #2E2347;
 }
 
 .code-block-label {
   font-family: var(--font-mono);
   font-size: var(--font-size-s);
-  color: #787c99;
+  color: #7B6A96;
 }
 
 .copy-button {
@@ -942,9 +935,9 @@ section {
   align-items: center;
   gap: 6px;
   background: none;
-  border: 1px solid #3a3a4a;
+  border: 1px solid #2E2347;
   border-radius: var(--radius-s);
-  color: #787c99;
+  color: #7B6A96;
   font-family: var(--font-text);
   font-size: var(--font-size-s);
   padding: 4px 10px;
@@ -953,8 +946,8 @@ section {
 }
 
 .copy-button:hover {
-  border-color: #565f89;
-  color: #a9b1d6;
+  border-color: #8B5FBF;
+  color: #C9BFD9;
 }
 
 .copy-button .icon {
