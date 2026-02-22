@@ -1,237 +1,420 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="theme-dark">
+  <head>
+    <meta charset="utf-8" />
+    <title>ClipSlots — Stop losing what you just copied</title>
+    <meta
+      content="9 keyboard-triggered clipboard slots for macOS. Press a hotkey to save, press another to paste — in any app, instantly."
+      name="description"
+    />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
 
-<head>
-  <meta charset="utf-8" />
-  <title>ClipSlots — Named clipboard slots with global hotkeys for macOS</title>
-  <meta content="Save, switch, and paste clipboard slots with global hotkeys. A lightweight CLI tool for macOS." name="description" />
-  <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ClipSlots" />
+    <meta property="og:locale" content="en_US" />
+    <meta
+      property="og:title"
+      content="ClipSlots — Stop losing what you just copied"
+    />
+    <meta
+      property="og:description"
+      content="9 keyboard-triggered clipboard slots for macOS. Press a hotkey to save, press another to paste — in any app, instantly."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="ClipSlots" />
+    <meta
+      name="twitter:description"
+      content="9 keyboard-triggered clipboard slots for macOS. Press a hotkey to save, press another to paste — in any app, instantly."
+    />
 
-  <!-- Open Graph -->
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="ClipSlots" />
-  <meta property="og:locale" content="en_US" />
-  <meta property="og:title" content="ClipSlots — Named clipboard slots with global hotkeys for macOS" />
-  <meta property="og:description" content="Save, switch, and paste clipboard slots with global hotkeys. A lightweight CLI tool for macOS." />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="ClipSlots" />
-  <meta name="twitter:description" content="Save, switch, and paste clipboard slots with global hotkeys. A lightweight CLI tool for macOS." />
+    <!-- Favicon and icons -->
+    <link
+      rel="icon"
+      href="images/favicon/favicon.ico"
+      sizes="16x16 32x32 48x48 256x256"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="images/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="256x256"
+      href="images/favicon/favicon-256x256.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="images/favicon/favicon-512.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="images/favicon/apple-touch-icon.png"
+    />
 
-  <!-- Favicon and icons -->
-  <link rel="icon" href="images/favicon/favicon.ico" sizes="16x16 32x32 48x48 256x256" />
-  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="256x256" href="images/favicon/favicon-256x256.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="images/favicon/favicon-512.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="images/favicon/apple-touch-icon.png" />
+    <!-- Preload fonts -->
+    <link
+      rel="preload"
+      href="fonts/InterVariable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
 
-  <!-- Preload fonts -->
-  <link rel="preload" href="fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- Styles -->
+    <link href="vendor/font-awesome-6.7.2/css/all.min.css" rel="stylesheet" />
+    <link href="css/index.css" rel="stylesheet" type="text/css" />
+    <link href="css/tablet.css" rel="stylesheet" type="text/css" />
+    <link href="css/mobile.css" rel="stylesheet" type="text/css" />
+    <script src="js/main.js" type="text/javascript" defer></script>
+  </head>
 
-  <!-- Styles -->
-  <link href="vendor/font-awesome-6.7.2/css/all.min.css" rel="stylesheet" />
-  <link href="css/index.css" rel="stylesheet" type="text/css" />
-  <link href="css/tablet.css" rel="stylesheet" type="text/css" />
-  <link href="css/mobile.css" rel="stylesheet" type="text/css" />
-  <script src="js/main.js" type="text/javascript" defer></script>
-</head>
-
-<body>
-  <div class="background-gradient"></div>
-  <div class="page-container">
-    <header class="nav-container">
-      <a href="index.html" class="nav-brand">
-        <span class="brand-text">ClipSlots</span>
-      </a>
-      <nav role="navigation" class="nav-menu" data-navigation>
-        <a href="#features" class="nav-link">Features</a>
-        <a href="#install" class="nav-link">Install</a>
-        <a href="https://github.com/olafglad/clipSlots" class="nav-link" target="_blank">Docs ↗</a>
-        <div class="button-group stacked margin-top-l mobile-only">
-          <a href="https://github.com/olafglad/clipSlots" class="button primary" target="_blank">
-            <div class="fa-brands fa-github icon m"></div>
-            View on GitHub
-          </a>
-        </div>
-      </nav>
-      <div class="button-group">
-        <a href="https://github.com/olafglad/clipSlots" class="button ghost compact hide-on-mobile" target="_blank">
-          <div class="fa-brands fa-github icon l"></div>
+  <body>
+    <div class="background-gradient"></div>
+    <div class="page-container">
+      <header class="nav-container">
+        <a href="index.html" class="nav-brand">
+          <span class="brand-text">ClipSlots</span>
         </a>
-        <a href="#install" class="button primary compact">Install</a>
-        <button class="button ghost compact nav-hamburger" data-mobile-toggle aria-label="Show menu">
-          <span class="fa-solid fa-bars icon m"></span>
-        </button>
-      </div>
-    </header>
-    <main>
-      <!-- Hero -->
-      <section>
-        <div class="heading hero centered">
-          <a href="https://github.com/olafglad/clipSlots/releases" class="eyebrow" target="_blank">v1.0 — Now available</a>
-          <h1 class="balanced">
-            Named clipboard slots with global hotkeys
-          </h1>
-          <p class="paragraph m secondary balanced">
-            Save anything to numbered slots, recall it instantly with a keystroke. A lightweight CLI + daemon for macOS.
-          </p>
-          <div class="button-group margin-paragraph centered">
-            <a href="#install" class="button primary">
-              <div class="fa-solid fa-download icon m"></div>
-              Install
-            </a>
-            <a href="https://github.com/olafglad/clipSlots" class="button tertiary" target="_blank">
+        <nav role="navigation" class="nav-menu" data-navigation>
+          <a href="#features" class="nav-link">Features</a>
+          <a href="#install" class="nav-link">Install</a>
+          <a
+            href="https://github.com/olafglad/clipSlots"
+            class="nav-link"
+            target="_blank"
+            >Docs ↗</a
+          >
+          <div class="button-group stacked margin-top-l mobile-only">
+            <a
+              href="https://github.com/olafglad/clipSlots"
+              class="button primary"
+              target="_blank"
+            >
               <div class="fa-brands fa-github icon m"></div>
-              GitHub
+              View on GitHub
             </a>
           </div>
+        </nav>
+        <div class="button-group">
+          <a
+            href="https://github.com/olafglad/clipSlots"
+            class="button ghost compact hide-on-mobile"
+            target="_blank"
+          >
+            <div class="fa-brands fa-github icon l"></div>
+          </a>
+          <a href="#install" class="button primary compact">Install</a>
+          <button
+            class="button ghost compact nav-hamburger"
+            data-mobile-toggle
+            aria-label="Show menu"
+          >
+            <span class="fa-solid fa-bars icon m"></span>
+          </button>
         </div>
-        <div class="mascot-container">
-          <img src="images/mascot.png" width="220" height="220" alt="ClipSlots mascot — a purple octopus holding numbered clipboards" class="mascot-hero" />
-        </div>
-        <!-- Terminal demo -->
-        <div class="image-wide">
-          <div class="terminal-demo">
-            <div class="terminal-bar">
-              <span class="terminal-dot red"></span>
-              <span class="terminal-dot yellow"></span>
-              <span class="terminal-dot green"></span>
-              <span class="terminal-title">clipslots</span>
+      </header>
+      <main>
+        <!-- Hero -->
+        <section>
+          <div class="heading hero centered">
+            <a
+              href="https://github.com/olafglad/clipSlots/releases"
+              class="eyebrow"
+              target="_blank"
+              >v1.0 — Now available</a
+            >
+            <h1 class="balanced">Stop losing what you just copied</h1>
+            <p class="paragraph m secondary balanced">
+              ClipSlots gives you 9 keyboard-triggered clipboard slots. Press a
+              hotkey to save, press another to paste &mdash; in any app,
+              instantly. A tiny macOS daemon, no GUI.
+            </p>
+            <div class="button-group margin-paragraph centered">
+              <a href="#install" class="button primary">
+                <div class="fa-solid fa-download icon m"></div>
+                Install
+              </a>
+              <a
+                href="https://github.com/olafglad/clipSlots"
+                class="button tertiary"
+                target="_blank"
+              >
+                <div class="fa-brands fa-github icon m"></div>
+                GitHub
+              </a>
             </div>
-            <div class="terminal-body">
-              <pre><span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots save 1</span>
-<span class="terminal-output">Saved to slot 1: "Hello, world!"</span>
+          </div>
+          <div class="mascot-container">
+            <img
+              src="images/mascot.png"
+              width="220"
+              height="220"
+              alt="ClipSlots mascot — a purple octopus holding numbered clipboards"
+              class="mascot-hero"
+            />
+          </div>
+        </section>
 
-<span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots save 2</span>
-<span class="terminal-output">Saved to slot 2: "https://github.com/olafglad/clipSlots"</span>
+        <!-- Features -->
+        <section id="features">
+          <div class="heading centered">
+            <h2 class="no-top-margin">One daemon. Zero bloat.</h2>
+            <p class="paragraph m secondary">
+              A single Swift binary with no GUI, no Electron, no subscription.
+              Runs quietly in the background and gets out of your way.
+            </p>
+          </div>
+          <div class="cards-with-icons-container">
+            <div class="card-with-icon horizontal">
+              <div class="fa-solid fa-hashtag icon xl color-accent"></div>
+              <div class="feature-heading">
+                <p class="paragraph m bold">9 clipboard slots</p>
+                <p class="paragraph m secondary">
+                  Copy something, press Ctrl+Opt+3, it's saved. Press Ctrl+3
+                  later, it's back. Slots persist until you clear them.
+                </p>
+              </div>
+            </div>
+            <div class="card-with-icon horizontal">
+              <div class="fa-regular fa-keyboard icon xl color-accent"></div>
+              <div class="feature-heading">
+                <p class="paragraph m bold">Works in every app</p>
+                <p class="paragraph m secondary">
+                  System-wide hotkeys that work whether you're in VS Code,
+                  Chrome, Figma, or Terminal. No focus switching.
+                </p>
+              </div>
+            </div>
+            <div class="card-with-icon horizontal">
+              <div class="fa-solid fa-images icon xl color-accent"></div>
+              <div class="feature-heading">
+                <p class="paragraph m bold">Not just text</p>
+                <p class="paragraph m secondary">
+                  Copies images, RTF, HTML, and file references exactly as-is.
+                  What you copy is what you paste.
+                </p>
+              </div>
+            </div>
+            <div class="card-with-icon horizontal">
+              <div class="fa-solid fa-gear icon xl color-accent"></div>
+              <div class="feature-heading">
+                <p class="paragraph m bold">Starts on login, stays hidden</p>
+                <p class="paragraph m secondary">
+                  A launchd daemon that runs in the background. No menubar icon,
+                  no dock icon, no interruptions.
+                </p>
+              </div>
+            </div>
+            <div class="card-with-icon horizontal">
+              <div class="fa-solid fa-file-code icon xl color-accent"></div>
+              <div class="feature-heading">
+                <p class="paragraph m bold">One config file</p>
+                <p class="paragraph m secondary">
+                  Edit
+                  <span class="inline-code"
+                    >~/.config/clipslots/config.toml</span
+                  >
+                  to change hotkeys, slot count, and logging. Hot-reloads on
+                  save.
+                </p>
+              </div>
+            </div>
+            <div class="card-with-icon horizontal">
+              <div class="fa-solid fa-terminal icon xl color-accent"></div>
+              <div class="feature-heading">
+                <p class="paragraph m bold">Full CLI control</p>
+                <p class="paragraph m secondary">
+                  <span class="inline-code">clipslots status</span>,
+                  <span class="inline-code">clipslots list</span>,
+                  <span class="inline-code">clipslots config --edit</span>.
+                  Script it, alias it, pipe it.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-<span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots list</span>
-<span class="terminal-output">  1: Hello, world!
-  2: https://github.com/olafglad/clipSlots</span>
+        <!-- Terminal demo -->
+        <section>
+          <div class="heading centered">
+            <h2 class="no-top-margin">See it in action</h2>
+          </div>
+          <div class="image-wide">
+            <div class="terminal-demo">
+              <div class="terminal-bar">
+                <span class="terminal-dot red"></span>
+                <span class="terminal-dot yellow"></span>
+                <span class="terminal-dot green"></span>
+                <span class="terminal-title">clipslots</span>
+              </div>
+              <div class="terminal-body">
+                <pre><span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots --help</span>
+<span class="terminal-output">OVERVIEW: Lightweight clipboard slot manager for macOS
 
-<span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots paste 1</span>
-<span class="terminal-output">Pasted from slot 1: "Hello, world!"</span>
+USAGE: clipslots &lt;subcommand&gt;
+
+OPTIONS:
+  --version       Show the version.
+  -h, --help      Show help information.
+
+SUBCOMMANDS:
+  save            Save current clipboard content to a slot
+  paste           Load slot content to clipboard
+  list            Show all slots with content preview
+  clear           Clear one or all slots
+  start           Start the ClipSlots daemon
+  stop            Stop the ClipSlots daemon
+  restart         Restart the ClipSlots daemon
+  status          Show daemon status and configuration
+  config          Show or edit configuration
+  permissions     Check and guide through permission setup</span>
 
 <span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots start</span>
-<span class="terminal-output">Daemon started. Global hotkeys active.
-  Ctrl+Opt+[1-9]  → save to slot
-  Ctrl+Cmd+[1-9]  → paste from slot</span></pre>
-            </div>
-          </div>
-        </div>
-      </section>
+<span class="terminal-output">ClipSlots daemon started successfully
+Logs: /tmp/clipslots.log</span></pre>
+                <br />
+                <div class="terminal-collapsed" data-terminal-collapsed>
+                  <pre>
+<span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots status</span>
+<span class="terminal-output">ClipSlots Status
+────────────────
+Daemon:      Running (PID: 48291)
+Accessible:  Yes
+Slots:       5
+Logging:     on
 
-      <!-- Features -->
-      <section id="features">
-        <div class="heading centered">
-          <h2 class="no-top-margin">Everything you need, nothing you don't</h2>
-          <p class="paragraph m secondary">
-            ClipSlots is a single binary with zero dependencies. No Electron, no menubar app, no subscription.
-          </p>
-        </div>
-        <div class="cards-with-icons-container">
-          <div class="card-with-icon horizontal">
-            <div class="fa-solid fa-hashtag icon xl color-accent"></div>
-            <div class="feature-heading">
-              <p class="paragraph m bold">Named Slots</p>
-              <p class="paragraph m secondary">
-                Save clipboard contents to numbered slots (1-9). Each slot holds text, images, or rich content until you clear it.
-              </p>
-            </div>
-          </div>
-          <div class="card-with-icon horizontal">
-            <div class="fa-regular fa-keyboard icon xl color-accent"></div>
-            <div class="feature-heading">
-              <p class="paragraph m bold">Global Hotkeys</p>
-              <p class="paragraph m secondary">
-                Save and paste with system-wide keyboard shortcuts. Works in any app, no focus switching needed.
-              </p>
-            </div>
-          </div>
-          <div class="card-with-icon horizontal">
-            <div class="fa-solid fa-images icon xl color-accent"></div>
-            <div class="feature-heading">
-              <p class="paragraph m bold">Rich Clipboard</p>
-              <p class="paragraph m secondary">
-                Preserves images, RTF, HTML, and file references &mdash; not just plain text. What you copy is what you paste.
-              </p>
-            </div>
-          </div>
-          <div class="card-with-icon horizontal">
-            <div class="fa-solid fa-gear icon xl color-accent"></div>
-            <div class="feature-heading">
-              <p class="paragraph m bold">Daemon Mode</p>
-              <p class="paragraph m secondary">
-                Run as a background daemon with launchd integration. Starts on login, stays out of your way.
-              </p>
-            </div>
-          </div>
-          <div class="card-with-icon horizontal">
-            <div class="fa-solid fa-file-code icon xl color-accent"></div>
-            <div class="feature-heading">
-              <p class="paragraph m bold">TOML Config</p>
-              <p class="paragraph m secondary">
-                Customize hotkey bindings, slot count, and behavior with a simple config file. Hot-reloads on save.
-              </p>
-            </div>
-          </div>
-          <div class="card-with-icon horizontal">
-            <div class="fa-solid fa-terminal icon xl color-accent"></div>
-            <div class="feature-heading">
-              <p class="paragraph m bold">CLI First</p>
-              <p class="paragraph m secondary">
-                Full control from the command line. Script it, alias it, pipe it. Built for developers.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+Keybinds:
+  Save:      Ctrl+Opt+[1-5]
+  Paste:     Ctrl+[1-5]</span>
 
-      <!-- Install -->
-      <section id="install">
-        <div class="heading">
-          <h2 class="no-top-margin">Get started in seconds</h2>
-          <p class="paragraph m secondary">
-            Install with Homebrew, grant accessibility permissions, and you're ready to go.
-          </p>
-        </div>
-        <div class="grid columns-1/2-1 gap-xl">
-          <div class="install-steps">
-            <div class="install-step">
-              <div class="step-number">1</div>
-              <div>
-                <p class="paragraph m bold no-top-margin">Install</p>
-                <p class="paragraph s secondary">Via Homebrew (coming soon) or build from source</p>
-              </div>
-            </div>
-            <div class="install-step">
-              <div class="step-number">2</div>
-              <div>
-                <p class="paragraph m bold no-top-margin">Grant permissions</p>
-                <p class="paragraph s secondary">Allow accessibility access for global hotkeys</p>
-              </div>
-            </div>
-            <div class="install-step">
-              <div class="step-number">3</div>
-              <div>
-                <p class="paragraph m bold no-top-margin">Start the daemon</p>
-                <p class="paragraph s secondary">Run <span class="inline-code">clipslots start</span> and you're set</p>
+<span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots list</span>
+<span class="terminal-output">Slot 1: Text (42 chars)
+Slot 2: Text (128 chars)
+Slot 3: Image (PNG)
+Slot 4: (empty)
+Slot 5: (empty)</span>
+
+<span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots config</span>
+<span class="terminal-output">ClipSlots Configuration
+───────────────────────
+Config file: ~/.config/clipslots/config.toml
+
+Slots:       5
+Logging:     on
+
+Keybinds:
+  Save:      ctrl+option+{n}
+  Paste:     ctrl+{n}
+
+Run 'clipslots config --edit' to open in editor.</span></pre>
+                </div>
+                <button class="terminal-toggle" data-terminal-toggle>
+                  <span class="terminal-toggle-label">Show more</span>
+                  <span
+                    class="fa-solid fa-chevron-down terminal-toggle-icon"
+                  ></span>
+                </button>
               </div>
             </div>
           </div>
-          <div class="card-code-block dark">
-            <div class="code-block-header">
-              <span class="code-block-label">Terminal</span>
-              <button class="copy-button" data-copy="git clone https://github.com/olafglad/clipSlots.git
+        </section>
+
+        <!-- Lightweight -->
+        <section id="lightweight">
+          <div class="heading centered">
+            <h2 class="no-top-margin">Your Mac won't notice it</h2>
+            <p class="paragraph m secondary">
+              ClipSlots uses zero CPU and around 10MB of RAM. Here's proof
+              &mdash; real Activity Monitor screenshots with the daemon running.
+            </p>
+          </div>
+          <div class="resource-proof-grid">
+            <div class="resource-proof">
+              <img
+                src="images/monitor-cpu.png"
+                alt="Activity Monitor showing clipslots using 0.0% CPU"
+              />
+              <p class="resource-caption paragraph s tertiary">0% CPU</p>
+            </div>
+            <div class="resource-proof">
+              <img
+                src="images/monitor-ram.png"
+                alt="Activity Monitor showing clipslots using 10.3 MB RAM"
+              />
+              <p class="resource-caption paragraph s tertiary">~10 MB RAM</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Install -->
+        <section id="install">
+          <div class="heading">
+            <h2 class="no-top-margin">Install in 30 seconds</h2>
+            <p class="paragraph m secondary">
+              Clone, build, grant one permission, and you're done.
+            </p>
+          </div>
+          <div class="grid columns-1/2-1 gap-xl">
+            <div class="install-steps">
+              <div class="install-step">
+                <div class="step-number">1</div>
+                <div>
+                  <p class="paragraph m bold no-top-margin">
+                    Build from source
+                  </p>
+                  <p class="paragraph s secondary">
+                    Clone, build, done. Homebrew tap coming soon.
+                  </p>
+                </div>
+              </div>
+              <div class="install-step">
+                <div class="step-number">2</div>
+                <div>
+                  <p class="paragraph m bold no-top-margin">
+                    Grant accessibility
+                  </p>
+                  <p class="paragraph s secondary">
+                    macOS needs this to register global hotkeys. One-time step.
+                  </p>
+                </div>
+              </div>
+              <div class="install-step">
+                <div class="step-number">3</div>
+                <div>
+                  <p class="paragraph m bold no-top-margin">Start</p>
+                  <p class="paragraph s secondary">
+                    That's it. Hotkeys are now live.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="card-code-block dark">
+              <div class="code-block-header">
+                <span class="code-block-label">Terminal</span>
+                <button
+                  class="copy-button"
+                  data-copy="git clone https://github.com/olafglad/clipSlots.git
 cd clipSlots
 swift build -c release
 cp .build/release/clipslots /usr/local/bin/
 clipslots permissions
-clipslots start" aria-label="Copy to clipboard">
-                <span class="fa-regular fa-copy icon s"></span>
-                <span class="copy-label">Copy</span>
-              </button>
-            </div>
-            <pre style="margin: 0; color: #C9BFD9"><code><span class="line"><span style="color:#7B6A96"># Clone and build</span></span>
+clipslots start"
+                  aria-label="Copy to clipboard"
+                >
+                  <span class="fa-regular fa-copy icon s"></span>
+                  <span class="copy-label">Copy</span>
+                </button>
+              </div>
+              <pre
+                style="margin: 0; color: #c9bfd9"
+              ><code><span class="line"><span style="color:#7B6A96"># Clone and build</span></span>
 <span class="line"><span style="color:#7DDFB0">git clone</span> <span style="color:#B088D0">https://github.com/olafglad/clipSlots.git</span></span>
 <span class="line"><span style="color:#7DDFB0">cd</span> <span style="color:#B088D0">clipSlots</span></span>
 <span class="line"><span style="color:#7DDFB0">swift build</span> <span style="color:#B088D0">-c release</span></span>
@@ -240,59 +423,86 @@ clipslots start" aria-label="Copy to clipboard">
 <span class="line"><span style="color:#7B6A96"># Set up and run</span></span>
 <span class="line"><span style="color:#7DDFB0">clipslots</span> <span style="color:#B088D0">permissions</span></span>
 <span class="line"><span style="color:#7DDFB0">clipslots</span> <span style="color:#B088D0">start</span></span></code></pre>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- CTA -->
-      <section class="promo-cta">
-        <div class="heading centered">
-          <h2>Open source. Free forever.</h2>
-          <p class="paragraph m" style="opacity: 0.85">
-            ClipSlots is MIT licensed. Star the repo, report bugs, or contribute.
-          </p>
-          <div class="button-group margin-paragraph centered">
-            <a href="https://github.com/olafglad/clipSlots" class="button primary" target="_blank">
-              <div class="fa-brands fa-github icon m"></div>
-              Star on GitHub
-            </a>
-            <a href="https://ko-fi.com/olafglad" class="button tertiary" target="_blank" style="border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.8);">
-              <div class="fa-solid fa-mug-hot icon m"></div>
-              Buy me a coffee
-            </a>
+        <!-- CTA -->
+        <section class="promo-cta">
+          <div class="heading centered">
+            <h2>Free, open source, no catch.</h2>
+            <p class="paragraph m" style="opacity: 0.85">
+              MIT licensed. No telemetry, no account, no server. Star it if it
+              saves you time.
+            </p>
+            <div class="button-group margin-paragraph centered">
+              <a
+                href="https://github.com/olafglad/clipSlots"
+                class="button primary"
+                target="_blank"
+              >
+                <div class="fa-brands fa-github icon m"></div>
+                Star on GitHub
+              </a>
+              <a
+                href="https://ko-fi.com/olafglad"
+                class="button tertiary"
+                target="_blank"
+                style="
+                  border-color: rgba(255, 255, 255, 0.3);
+                  color: rgba(255, 255, 255, 0.8);
+                "
+              >
+                <div class="fa-solid fa-mug-hot icon m"></div>
+                Buy me a coffee
+              </a>
+            </div>
+          </div>
+        </section>
+      </main>
+      <footer class="footer">
+        <div class="footer-menu">
+          <div>
+            <p class="paragraph s">
+              MIT License<br />
+              Built with
+              <a href="https://launchkit.evilmartians.io" target="_blank"
+                >LaunchKit</a
+              >
+              by
+              <a href="https://evilmartians.com" target="_blank"
+                >Evil Martians</a
+              >
+            </p>
+          </div>
+          <div>
+            <div class="link-list">
+              <a
+                href="https://github.com/olafglad/clipSlots"
+                class="icon-link ui s"
+                target="_blank"
+              >
+                <div class="fa-brands fa-github icon m color-accent"></div>
+                <div class="pseudo-link">GitHub</div>
+              </a>
+              <a
+                href="https://ko-fi.com/olafglad"
+                class="icon-link ui s"
+                target="_blank"
+              >
+                <div class="fa-solid fa-mug-hot icon m color-accent"></div>
+                <div class="pseudo-link">Ko-fi</div>
+              </a>
+            </div>
+          </div>
+          <div>
+            <div class="link-list">
+              <a href="#features" class="ui s">Features</a>
+              <a href="#install" class="ui s">Install</a>
+            </div>
           </div>
         </div>
-      </section>
-    </main>
-    <footer class="footer">
-      <div class="footer-menu">
-        <div>
-          <p class="paragraph s">
-            MIT License<br />
-            Built with <a href="https://launchkit.evilmartians.io" target="_blank">LaunchKit</a> by <a href="https://evilmartians.com" target="_blank">Evil Martians</a>
-          </p>
-        </div>
-        <div>
-          <div class="link-list">
-            <a href="https://github.com/olafglad/clipSlots" class="icon-link ui s" target="_blank">
-              <div class="fa-brands fa-github icon m color-accent"></div>
-              <div class="pseudo-link">GitHub</div>
-            </a>
-            <a href="https://ko-fi.com/olafglad" class="icon-link ui s" target="_blank">
-              <div class="fa-solid fa-mug-hot icon m color-accent"></div>
-              <div class="pseudo-link">Ko-fi</div>
-            </a>
-          </div>
-        </div>
-        <div>
-          <div class="link-list">
-            <a href="#features" class="ui s">Features</a>
-            <a href="#install" class="ui s">Install</a>
-          </div>
-        </div>
-      </div>
-    </footer>
-  </div>
-</body>
-
+      </footer>
+    </div>
+  </body>
 </html>

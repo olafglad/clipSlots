@@ -45,8 +45,21 @@ function handleSmoothScroll() {
   });
 }
 
+function handleTerminalToggle() {
+  const toggle = document.querySelector("[data-terminal-toggle]");
+  const collapsed = document.querySelector("[data-terminal-collapsed]");
+  if (!toggle || !collapsed) return;
+
+  toggle.addEventListener("click", () => {
+    const isOpen = collapsed.classList.toggle("open");
+    toggle.classList.toggle("open", isOpen);
+    toggle.querySelector(".terminal-toggle-label").textContent = isOpen ? "Show less" : "Show more";
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   handleMobileNav();
   handleCopyButtons();
   handleSmoothScroll();
+  handleTerminalToggle();
 });

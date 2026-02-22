@@ -55,7 +55,8 @@
   .columns-2,
   .columns-3,
   .columns-1\/2-1,
-  .cards-with-icons-container {
+  .cards-with-icons-container,
+  .resource-proof-grid {
     grid-template-columns: 1fr;
   }
 
