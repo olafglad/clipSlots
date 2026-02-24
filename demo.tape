@@ -20,14 +20,16 @@ Type "preexec() { echo -ne '\e[0m'; }"
 Enter
 Type "precmd() { echo -ne '\e[32m'; }"
 Enter
-# Pre-populate slots with realistic content (as if saved via hotkeys)
-Type "echo 'ssh deploy@prod.example.com' | pbcopy && clipslots save 1"
+# Pre-populate slots with relatable content (as if saved via hotkeys)
+Type "echo 'meeting@company.com' | pbcopy && clipslots save 1"
 Enter
-Type "echo 'SELECT * FROM users WHERE active = true;' | pbcopy && clipslots save 2"
+Type "echo 'SELECT * FROM orders WHERE status = pending;' | pbcopy && clipslots save 2"
 Enter
-Type "echo 'sk-proj-abc123def456' | pbcopy && clipslots save 3"
+Type "echo 'Bearer eyJhbGciOiJIUzI1NiJ9.xxxx' | pbcopy && clipslots save 3"
 Enter
-Type "echo 'https://github.com/olafglad/clipSlots' | pbcopy && clipslots save 4"
+Type "echo 'git rebase -i HEAD~3' | pbcopy && clipslots save 4"
+Enter
+Type "echo '⌘ Thanks for the quick review!' | pbcopy && clipslots save 5"
 Enter
 Type "clear"
 Enter
@@ -43,8 +45,8 @@ Sleep 3s
 Enter
 Sleep 300ms
 
-# Save some content to slots
-Type "echo 'Hello from slot 1' | pbcopy && clipslots save 1"
+# See what's in the slots
+Type "clipslots list"
 Enter
 Sleep 3.5s
 
