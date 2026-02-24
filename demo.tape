@@ -20,6 +20,10 @@ Type "preexec() { echo -ne '\e[0m'; }"
 Enter
 Type "precmd() { echo -ne '\e[32m'; }"
 Enter
+# Alias clipslots to wrapper that fixes "Accessible: No" in VHS headless env
+Type "alias clipslots='./demo-wrapper.sh'"
+Enter
+
 # Pre-populate slots with relatable content (as if saved via hotkeys)
 Type "echo 'meeting@company.com' | pbcopy && clipslots save 1"
 Enter

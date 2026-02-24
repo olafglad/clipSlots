@@ -19,3 +19,6 @@ xcuserdata/
 
 # Plans
 LAUNCHPLAN.md
+
+# Demo build helper
+demo-wrapper.sh
