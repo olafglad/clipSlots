@@ -25,7 +25,7 @@ Ctrl + Option + 3  →  saves your clipboard to slot 3
 Ctrl + 3           →  pastes slot 3, just like Cmd+V
 ```
 
-That's it. Works with plain text, images, screenshots, files from Finder, rich text from browsers — anything your clipboard can hold.
+That's it. Works with plain text, images, screenshots, files from Finder, rich text from browsers — anything your clipboard can hold. Keybindings are fully configurable — use whatever modifier + key combo you want.
 
 <!-- TODO: terminal demo GIF here -->
 
@@ -37,11 +37,11 @@ That's it. Works with plain text, images, screenshots, files from Finder, rich t
 
 **Not just text** — Images, RTF, HTML, file references. What you copy is what you paste.
 
+**Fully configurable keybindings** — Don't like the defaults? Change them to any modifier + key combo. `cmd+shift+{n}`, `option+{n}`, whatever suits you.
+
 **Starts on login, stays hidden** — A launchd daemon. No menubar icon, no dock icon, no interruptions.
 
-**One config file** — Edit `~/.config/clipslots/config.toml` to change hotkeys, slot count, and logging. Hot-reloads on save.
-
-**Full CLI control** — `clipslots status`, `clipslots list`, `clipslots config --edit`. Script it, alias it, pipe it.
+**One config file** — Edit `~/.config/clipslots/config.toml` to change hotkeys, slot count, and logging. Hot-reloads on save — no restart needed.
 
 ## Install
 
@@ -70,26 +70,45 @@ Done. Hotkeys are live.
 
 ## Usage
 
-### CLI
+```
+$ clipslots --help
 
-| Command | What it does |
-|---|---|
-| `clipslots save 3` | Save clipboard to slot 3 |
-| `clipslots paste 3` | Restore slot 3 to clipboard |
-| `clipslots list` | Show all slots with content preview |
-| `clipslots clear 3` | Clear slot 3 |
-| `clipslots clear` | Clear all slots |
-| `clipslots status` | Show daemon status and config |
-| `clipslots config` | Show current configuration |
-| `clipslots config -e` | Open config file in your editor |
+OVERVIEW: Lightweight clipboard slot manager for macOS
 
-### Daemon
+USAGE: clipslots <subcommand>
 
-| Command | What it does |
-|---|---|
-| `clipslots start` | Start the background daemon |
-| `clipslots stop` | Stop the daemon |
-| `clipslots restart` | Restart the daemon |
+OPTIONS:
+  --version               Show the version.
+  -h, --help              Show help information.
+
+SUBCOMMANDS:
+  save                    Save current clipboard content to a slot
+  paste                   Load slot content to clipboard
+  list                    Show all slots with content preview
+  clear                   Clear one or all slots
+  start                   Start the ClipSlots daemon
+  stop                    Stop the ClipSlots daemon
+  restart                 Restart the ClipSlots daemon
+  status                  Show daemon status and configuration
+  config                  Show or edit configuration
+  permissions             Check and guide through permission setup
+```
+
+```
+$ clipslots status
+
+ClipSlots Status
+────────────────
+Daemon:      Running (PID: 12838)
+Accessible:  Yes
+Pasteboard:  Allowed
+Slots:       5
+Logging:     on
+
+Keybinds:
+  Save:      ctrl+option+{n}
+  Paste:     ctrl+{n}
+```
 
 ### Configuration
 
@@ -97,15 +116,13 @@ Edit `~/.config/clipslots/config.toml`:
 
 ```toml
 slots = 5
-verbose = true
 
 [keybinds]
 save = "ctrl+option+{n}"
-paste = "ctrl+{n}"
+paste = "cmd+shift+{n}"
 ```
 
-**Modifiers:** `ctrl`, `option`, `cmd`, `shift`
-**Keys:** `0-9`, `a-z`, `f1-f12`
+Use any combo you want. **Modifiers:** `ctrl`, `option`, `cmd`, `shift` — **Keys:** `0-9`, `a-z`, `f1-f12`
 
 Config changes hot-reload — no restart needed.
 
