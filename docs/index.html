@@ -128,9 +128,17 @@
               instantly. A tiny macOS daemon, no GUI.
             </p>
             <div class="button-group margin-paragraph centered">
-              <a href="#install" class="button primary">
+              <a
+                href="https://github.com/olafglad/clipSlots/releases/latest"
+                class="button primary"
+                target="_blank"
+              >
                 <div class="fa-solid fa-download icon m"></div>
-                Install
+                Download
+              </a>
+              <a href="#install" class="button tertiary">
+                <div class="fa-solid fa-terminal icon m"></div>
+                Build from source
               </a>
               <a
                 href="https://github.com/olafglad/clipSlots"
@@ -351,7 +359,12 @@ Run 'clipslots config --edit' to open in editor.</span></pre>
           <div class="heading">
             <h2 class="no-top-margin">Install in 30 seconds</h2>
             <p class="paragraph m secondary">
-              Clone, build, grant one permission, and you're done.
+              <a
+                href="https://github.com/olafglad/clipSlots/releases/latest"
+                target="_blank"
+                class="color-teal"
+                >Download the .pkg installer</a
+              > or build from source below.
             </p>
           </div>
           <div class="grid columns-1/2-1 gap-xl">
@@ -396,6 +409,7 @@ Run 'clipslots config --edit' to open in editor.</span></pre>
                   data-copy="git clone https://github.com/olafglad/clipSlots.git
 cd clipSlots
 swift build -c release
+sudo mkdir -p /usr/local/bin
 sudo cp .build/release/clipslots /usr/local/bin/
 clipslots permissions
 clipslots start"
@@ -411,6 +425,7 @@ clipslots start"
 <span class="line"><span style="color:#7DDFB0">git clone</span> <span style="color:#B088D0">https://github.com/olafglad/clipSlots.git</span></span>
 <span class="line"><span style="color:#7DDFB0">cd</span> <span style="color:#B088D0">clipSlots</span></span>
 <span class="line"><span style="color:#7DDFB0">swift build</span> <span style="color:#B088D0">-c release</span></span>
+<span class="line"><span style="color:#7DDFB0">sudo mkdir -p</span> <span style="color:#B088D0">/usr/local/bin</span></span>
 <span class="line"><span style="color:#7DDFB0">sudo cp</span> <span style="color:#B088D0">.build/release/clipslots /usr/local/bin/</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:#7B6A96"># Set up and run</span></span>

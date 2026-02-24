@@ -47,10 +47,13 @@ That's it. Works with plain text, images, screenshots, files from Finder, rich t
 
 ## Install
 
+**[Download the .pkg installer](https://github.com/olafglad/clipSlots/releases/latest)** — or build from source:
+
 ```bash
 git clone https://github.com/olafglad/clipSlots.git
 cd clipSlots
 swift build -c release
+sudo mkdir -p /usr/local/bin
 sudo cp .build/release/clipslots /usr/local/bin/
 ```
 

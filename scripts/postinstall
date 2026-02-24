@@ -1,0 +1,13 @@
+#!/bin/bash
+# ClipSlots post-install script
+# Runs after .pkg installs the binary to /usr/local/bin/clipslots
+
+mkdir -p /usr/local/bin
+
+# Remove Gatekeeper quarantine flag so the binary can run without warning
+xattr -d com.apple.quarantine /usr/local/bin/clipslots 2>/dev/null || true
+
+# Open Accessibility settings so the user can grant permission
+open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+
+exit 0

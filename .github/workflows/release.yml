@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build arm64
+        run: swift build -c release --arch arm64
+
+      - name: Stash arm64 binary
+        run: cp .build/release/clipslots clipslots-arm64
+
+      - name: Build x86_64
+        run: swift build -c release --arch x86_64
+
+      - name: Stash x86_64 binary
+        run: cp .build/release/clipslots clipslots-x86_64
+
+      - name: Create universal binary
+        run: lipo -create clipslots-arm64 clipslots-x86_64 -output clipslots
+
+      - name: Ad-hoc sign
+        run: codesign -s - clipslots
+
+      - name: Verify universal binary
+        run: file clipslots && lipo -info clipslots
+
+      - name: Build .pkg
+        run: |
+          mkdir -p pkg-root/usr/local/bin
+          cp clipslots pkg-root/usr/local/bin/
+          chmod +x pkg-root/usr/local/bin/clipslots
+
+          pkgbuild \
+            --root pkg-root \
+            --identifier com.clipslots.pkg \
+            --version "${{ steps.version.outputs.VERSION }}" \
+            --install-location / \
+            --scripts scripts/ \
+            "ClipSlots-${{ steps.version.outputs.VERSION }}.pkg"
+
+      - name: Create binary tarball
+        run: |
+          tar czf "clipslots-${{ steps.version.outputs.VERSION }}-universal.tar.gz" clipslots
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ClipSlots ${{ steps.version.outputs.VERSION }}
+          body: |
+            ## Install
+
+            **Option A — Download the installer (recommended)**
+
+            1. Download `ClipSlots-${{ steps.version.outputs.VERSION }}.pkg` below
+            2. Double-click to install (if macOS warns about an unverified developer, right-click the file and choose **Open**)
+            3. The installer copies `clipslots` to `/usr/local/bin` and opens Accessibility settings
+            4. Toggle **clipslots** on in the Accessibility list
+            5. Open Terminal and run `clipslots start`
+
+            **Option B — Build from source**
+
+            ```bash
+            git clone https://github.com/olafglad/clipSlots.git
+            cd clipSlots
+            swift build -c release
+            sudo cp .build/release/clipslots /usr/local/bin/
+            clipslots permissions
+            clipslots start
+            ```
+
+            **Option C — Download the raw binary**
+
+            Download `clipslots-${{ steps.version.outputs.VERSION }}-universal.tar.gz`, extract, copy to `/usr/local/bin`, and run `clipslots permissions`.
+          files: |
+            ClipSlots-${{ steps.version.outputs.VERSION }}.pkg
+            clipslots-${{ steps.version.outputs.VERSION }}-universal.tar.gz
