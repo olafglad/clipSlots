@@ -27,7 +27,9 @@ Ctrl + 3           →  pastes slot 3, just like Cmd+V
 
 That's it. Works with plain text, images, screenshots, files from Finder, rich text from browsers — anything your clipboard can hold. Keybindings are fully configurable — use whatever modifier + key combo you want.
 
-<!-- TODO: terminal demo GIF here -->
+<p align="center">
+  <img src="docs/images/demo.gif" alt="ClipSlots terminal demo" width="700" />
+</p>
 
 ## Why ClipSlots
 
