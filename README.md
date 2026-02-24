@@ -119,7 +119,7 @@ slots = 5
 
 [keybinds]
 save = "ctrl+option+{n}"
-paste = "cmd+shift+{n}"
+paste = "ctrl+{n}"
 ```
 
 Use any combo you want. **Modifiers:** `ctrl`, `option`, `cmd`, `shift` — **Keys:** `0-9`, `a-z`, `f1-f12`
