@@ -47,14 +47,9 @@ That's it. Works with plain text, images, screenshots, files from Finder, rich t
 
 ## Install
 
-**[Download the .pkg installer](https://github.com/olafglad/clipSlots/releases/latest)** — or build from source:
-
 ```bash
-git clone https://github.com/olafglad/clipSlots.git
-cd clipSlots
-swift build -c release
-sudo mkdir -p /usr/local/bin
-sudo cp .build/release/clipslots /usr/local/bin/
+brew tap olafglad/clipslots
+brew install clipslots
 ```
 
 Grant accessibility permission (required for global hotkeys):
@@ -73,6 +68,19 @@ clipslots start
 ```
 
 Done. Hotkeys are live.
+
+<details>
+<summary>Alternative: build from source</summary>
+
+```bash
+git clone https://github.com/olafglad/clipSlots.git
+cd clipSlots
+swift build -c release
+sudo mkdir -p /usr/local/bin
+sudo cp .build/release/clipslots /usr/local/bin/
+```
+
+</details>
 
 ## Usage
 
