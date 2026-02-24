@@ -13,8 +13,6 @@ Set Framerate 30
 Set TypingSpeed 50ms
 
 # Set up custom prompt: teal "$ " prompt, teal input text
-# \e[32m = green (maps to #7DDFB0 in our theme)
-# The preexec trick resets color after Enter so output stays default
 Hide
 Type "export PS1=$'%{\e[32m%}$ '"
 Enter
@@ -22,51 +20,56 @@ Type "preexec() { echo -ne '\e[0m'; }"
 Enter
 Type "precmd() { echo -ne '\e[32m'; }"
 Enter
+# Pre-populate slots with realistic content (as if saved via hotkeys)
+Type "echo 'ssh deploy@prod.example.com' | pbcopy && clipslots save 1"
+Enter
+Type "echo 'SELECT * FROM users WHERE active = true;' | pbcopy && clipslots save 2"
+Enter
+Type "echo 'sk-proj-abc123def456' | pbcopy && clipslots save 3"
+Enter
+Type "echo 'https://github.com/olafglad/clipSlots' | pbcopy && clipslots save 4"
+Enter
 Type "clear"
 Enter
 Show
 
 Sleep 500ms
 
-# Start fresh
+# Check daemon status
 Type "clipslots status"
 Enter
-Sleep 2s
+Sleep 3s
 
-Type "clipslots list"
 Enter
-Sleep 2s
+Sleep 300ms
 
 # Save some content to slots
 Type "echo 'Hello from slot 1' | pbcopy && clipslots save 1"
 Enter
-Sleep 1.5s
+Sleep 3.5s
 
-Type "echo 'API_KEY=sk-abc123' | pbcopy && clipslots save 2"
+Enter
+Sleep 300ms
+
+# Clear a slot
+Type "clipslots clear 3"
 Enter
 Sleep 1.5s
 
-Type "echo 'SELECT * FROM users;' | pbcopy && clipslots save 3"
 Enter
-Sleep 1.5s
+Sleep 300ms
 
-# Show what's saved
+# Verify it's gone
 Type "clipslots list"
 Enter
-Sleep 3s
+Sleep 3.5s
 
-# Paste one back
-Type "clipslots paste 1 && pbpaste"
 Enter
-Sleep 2s
+Sleep 300ms
 
-# Clear and verify
-Type "clipslots clear 2"
+# Check config
+Type "clipslots config"
 Enter
-Sleep 1.5s
-
-Type "clipslots list"
-Enter
-Sleep 3s
+Sleep 3.5s
 
 Sleep 1s
