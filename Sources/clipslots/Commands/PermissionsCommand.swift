@@ -1,3 +1,4 @@
+import ApplicationServices
 import ArgumentParser
 import Foundation
 
@@ -7,37 +8,28 @@ struct Permissions: ParsableCommand {
     )
 
     mutating func run() throws {
-        let status = Clipboard().permissionStatus
+        let accessible = AXIsProcessTrusted()
 
-        print("Pasteboard Permission: \(status.description)")
+        print("Accessibility: \(accessible ? "Granted" : "Not granted")")
         print("")
 
-        switch status {
-        case .denied:
-            print("ClipSlots needs permission to read your clipboard.")
+        if accessible {
+            print("You're all set! ClipSlots can register global hotkeys.")
+        } else {
+            print("ClipSlots needs Accessibility permission to register global hotkeys.")
             print("")
             print("To grant permission:")
-            print("1. Open System Settings > Privacy & Security > Pasteboard")
-            print("2. Find \"ClipSlots\" in the list")
-            print("3. Toggle it ON")
+            print("1. Open System Settings > Privacy & Security > Accessibility")
+            print("2. Find \"clipslots\" in the list and toggle it ON")
+            print("3. If it's not listed, click \"+\" and add the clipslots binary")
             print("")
 
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-            process.arguments = ["x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_Pasteboard"]
+            process.arguments = ["x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_Accessibility"]
             print("Opening System Settings...")
             try? process.run()
             process.waitUntilExit()
-
-        case .promptEachTime:
-            print("ClipSlots will prompt for permission each time it accesses the clipboard.")
-            print("For a better experience, grant \"Always Allow\" in System Settings.")
-
-        case .allowed:
-            print("Permission granted! ClipSlots can access the clipboard.")
-
-        case .unknown:
-            print("Could not determine permission status.")
         }
     }
 }

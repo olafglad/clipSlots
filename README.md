@@ -54,13 +54,14 @@ swift build -c release
 sudo cp .build/release/clipslots /usr/local/bin/
 ```
 
-Grant accessibility permission (one-time):
+Grant accessibility permission (required for global hotkeys):
 
 ```bash
 clipslots permissions
 ```
 
-> System Settings > Privacy & Security > Accessibility > enable `clipslots`
+> This opens System Settings > Privacy & Security > Accessibility.
+> Find `clipslots` in the list and toggle it on.
 
 Start the daemon:
 
@@ -105,7 +106,7 @@ Daemon:      Running (PID: 12838)
 Accessible:  Yes
 Pasteboard:  Allowed
 Slots:       5
-Logging:     on
+Logging:     on (change in 'clipslots config --edit')
 
 Keybinds:
   Save:      ctrl+option+{n}

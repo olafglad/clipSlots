@@ -116,10 +116,10 @@
         <section>
           <div class="heading hero centered">
             <a
-              href="https://github.com/olafglad/clipSlots/releases"
+              href="https://github.com/olafglad/clipSlots"
               class="eyebrow"
               target="_blank"
-              >v1.0 — Now available</a
+              >v1.0 — Coming soon</a
             >
             <h1 class="balanced">Stop losing what you just copied</h1>
             <p class="paragraph m secondary balanced">
@@ -268,7 +268,8 @@ SUBCOMMANDS:
   permissions     Check and guide through permission setup</span>
 
 <span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots start</span>
-<span class="terminal-output">ClipSlots daemon started successfully
+<span class="terminal-output">Starting ClipSlots daemon...
+ClipSlots daemon started successfully
 Logs: /tmp/clipslots.log</span></pre>
                 <br />
                 <div class="terminal-collapsed" data-terminal-collapsed>
@@ -278,12 +279,13 @@ Logs: /tmp/clipslots.log</span></pre>
 ────────────────
 Daemon:      Running (PID: 48291)
 Accessible:  Yes
+Pasteboard:  Allowed
 Slots:       5
-Logging:     on
+Logging:     on (change in 'clipslots config --edit')
 
 Keybinds:
-  Save:      Ctrl+Opt+[1-5]
-  Paste:     Ctrl+[1-5]</span>
+  Save:      ctrl+option+{n}
+  Paste:     ctrl+{n}</span>
 
 <span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots list</span>
 <span class="terminal-output">Slot 1: Text (42 chars)
@@ -394,7 +396,7 @@ Run 'clipslots config --edit' to open in editor.</span></pre>
                   data-copy="git clone https://github.com/olafglad/clipSlots.git
 cd clipSlots
 swift build -c release
-cp .build/release/clipslots /usr/local/bin/
+sudo cp .build/release/clipslots /usr/local/bin/
 clipslots permissions
 clipslots start"
                   aria-label="Copy to clipboard"
@@ -409,7 +411,7 @@ clipslots start"
 <span class="line"><span style="color:#7DDFB0">git clone</span> <span style="color:#B088D0">https://github.com/olafglad/clipSlots.git</span></span>
 <span class="line"><span style="color:#7DDFB0">cd</span> <span style="color:#B088D0">clipSlots</span></span>
 <span class="line"><span style="color:#7DDFB0">swift build</span> <span style="color:#B088D0">-c release</span></span>
-<span class="line"><span style="color:#7DDFB0">cp</span> <span style="color:#B088D0">.build/release/clipslots /usr/local/bin/</span></span>
+<span class="line"><span style="color:#7DDFB0">sudo cp</span> <span style="color:#B088D0">.build/release/clipslots /usr/local/bin/</span></span>
 <span class="line"></span>
 <span class="line"><span style="color:#7B6A96"># Set up and run</span></span>
 <span class="line"><span style="color:#7DDFB0">clipslots</span> <span style="color:#B088D0">permissions</span></span>

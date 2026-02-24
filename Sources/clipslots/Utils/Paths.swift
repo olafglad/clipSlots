@@ -46,11 +46,7 @@ struct Paths {
     }
 
     static var binaryPath: String {
-        #if arch(arm64)
-        return "/opt/homebrew/bin/clipslots"
-        #else
         return "/usr/local/bin/clipslots"
-        #endif
     }
 
     static var logFile: URL {
