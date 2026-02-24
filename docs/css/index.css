@@ -151,10 +151,10 @@
   color-scheme: dark;
 
   /* ClipSlots brand palette — purple body + mint green accent */
-  --color-accent: #7DDFB0;
-  --color-accent-hover: #93E8BF;
-  --color-accent-b: rgba(125, 223, 176, 0.16);
-  --color-accent-b-hover: rgba(125, 223, 176, 0.24);
+  --color-accent: #8B5FBF;
+  --color-accent-hover: #9E75CF;
+  --color-accent-b: rgba(139, 95, 191, 0.2);
+  --color-accent-b-hover: rgba(139, 95, 191, 0.3);
 
   --color-background: #1E1430;
   --color-background-blur: rgba(30, 20, 48, 0.92);
@@ -163,9 +163,10 @@
   --color-text-tertiary: rgba(240, 235, 245, 0.42);
 
   --color-surface: rgba(240, 235, 245, 0.05);
-  --color-on-accent: #1E1430;
+  --color-on-accent: #FFFFFF;
   --color-border-level-2: rgba(240, 235, 245, 0.08);
   --color-border-level-3: rgba(240, 235, 245, 0.16);
+  --color-teal: #7DDFB0;
 
   --color-gradient-bg-start: rgba(139, 95, 191, 0.25);
   --color-gradient-bg-end: rgba(139, 95, 191, 0);
@@ -781,6 +782,28 @@ section {
 
 .color-accent {
   color: var(--color-accent);
+}
+
+.color-teal {
+  color: var(--color-teal, #7DDFB0);
+}
+
+.color-teal .icon {
+  color: inherit;
+}
+
+.button.teal {
+  background-color: var(--color-teal, #7DDFB0);
+  color: #1E1430;
+}
+
+.button.teal:hover {
+  background-color: #93E8BF;
+  color: #1E1430;
+}
+
+.button.teal .icon {
+  color: inherit;
 }
 
 .inline-code {
