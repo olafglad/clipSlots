@@ -11,8 +11,11 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/macOS-13%2B-blueviolet" alt="macOS 13+" />
-  <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License" />
+  <img src="https://img.shields.io/github/stars/olafglad/clipSlots" alt="GitHub stars" />
+  <img src="https://img.shields.io/github/v/release/olafglad/clipSlots" alt="GitHub release" />
+  <img src="https://img.shields.io/github/downloads/olafglad/clipSlots/total" alt="GitHub downloads" />
+  <img src="https://img.shields.io/github/license/olafglad/clipSlots" alt="License" />
+  <img src="https://img.shields.io/badge/macOS-13%2B-blue" alt="macOS 13+" />
   <a href="https://clipslots.dev"><img src="https://img.shields.io/badge/website-clipslots.dev-7DDFB0" alt="Website" /></a>
 </p>
 

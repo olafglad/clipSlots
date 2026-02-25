@@ -1,0 +1,17 @@
+name: Repository Stats
+
+on:
+  schedule:
+    - cron: "0 23 * * *"
+  workflow_dispatch:
+
+jobs:
+  repo-stats:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Collect repository traffic stats
+        uses: jgehrcke/github-repo-stats@v1
+        with:
+          repository: olafglad/clipSlots
+          ghtoken: ${{ secrets.GHRS_GITHUB_API_TOKEN }}
+          databranch: github-repo-stats
