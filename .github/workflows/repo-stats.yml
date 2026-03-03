@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Collect repository traffic stats
-        uses: jgehrcke/github-repo-stats@v1
+        uses: jgehrcke/github-repo-stats@v1.4.2
         with:
           repository: olafglad/clipSlots
           ghtoken: ${{ secrets.GHRS_GITHUB_API_TOKEN }}
