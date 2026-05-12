@@ -29,6 +29,10 @@ struct Paths {
         slotsDirectory.appendingPathComponent("manifest.json")
     }
 
+    static var labelsFile: URL {
+        slotsDirectory.appendingPathComponent("labels.json")
+    }
+
     static func slotDirectory(_ slot: Int) -> URL {
         slotsDirectory.appendingPathComponent(String(slot))
     }

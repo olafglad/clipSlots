@@ -99,8 +99,18 @@ struct ManifestEntry: Codable {
     let totalBytes: Int
     let itemCount: Int
     let updatedAt: String
+    let label: String?
 }
 
 struct Manifest: Codable {
+    var version: Int?
     var entries: [ManifestEntry] = []
+}
+
+extension Manifest {
+    /// Current manifest schema version. Bump when adding fields that require migration.
+    static let currentVersion: Int = 1
+
+    /// Resolved version: nil-decoded manifests are treated as v1.
+    var resolvedVersion: Int { version ?? 1 }
 }
