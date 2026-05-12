@@ -11,6 +11,7 @@ struct ClipSlots: ParsableCommand {
             Paste.self,
             List.self,
             Clear.self,
+            Label.self,
             Start.self,
             Stop.self,
             Restart.self,

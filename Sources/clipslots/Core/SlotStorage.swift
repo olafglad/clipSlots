@@ -11,6 +11,44 @@ class SlotStorage {
         try migrateIfNeeded()
     }
 
+    // MARK: - Labels
+
+    /// Returns the label for a slot, or nil if none set.
+    func getLabel(_ slotNumber: Int) -> String? {
+        loadLabels()[String(slotNumber)]
+    }
+
+    /// Sets (or clears, when label is nil/empty) the label for a slot.
+    func setLabel(_ slotNumber: Int, label: String?) throws {
+        var labels = loadLabels()
+        if let label = label, !label.isEmpty {
+            labels[String(slotNumber)] = label
+        } else {
+            labels.removeValue(forKey: String(slotNumber))
+        }
+        try writeLabels(labels)
+        try updateManifest()
+    }
+
+    private func loadLabels() -> [String: String] {
+        guard let data = try? Data(contentsOf: Paths.labelsFile),
+              let labels = try? JSONDecoder().decode([String: String].self, from: data) else {
+            return [:]
+        }
+        return labels
+    }
+
+    private func writeLabels(_ labels: [String: String]) throws {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        let data = try encoder.encode(labels)
+        try data.write(to: Paths.labelsFile, options: .atomic)
+    }
+
+    private func removeLabel(_ slotNumber: Int, persisting labels: inout [String: String]) {
+        labels.removeValue(forKey: String(slotNumber))
+    }
+
     // MARK: - Public API
 
     func getSlot(_ slotNumber: Int) -> SlotContent? {
@@ -83,6 +121,9 @@ class SlotStorage {
         if fm.fileExists(atPath: slotDir.path) {
             try fm.removeItem(at: slotDir)
         }
+        var labels = loadLabels()
+        removeLabel(slotNumber, persisting: &labels)
+        try writeLabels(labels)
         try updateManifest()
     }
 
@@ -93,6 +134,7 @@ class SlotStorage {
                 try fm.removeItem(at: slotDir)
             }
         }
+        try writeLabels([:])
         try updateManifest()
     }
 
@@ -123,6 +165,7 @@ class SlotStorage {
     private func updateManifest() throws {
         var entries: [ManifestEntry] = []
         let formatter = ISO8601DateFormatter()
+        let labels = loadLabels()
 
         for i in 1...slotCount {
             guard let content = getSlot(i) else { continue }
@@ -135,11 +178,12 @@ class SlotStorage {
                 types: allTypes,
                 totalBytes: totalBytes,
                 itemCount: content.items.count,
-                updatedAt: formatter.string(from: Date())
+                updatedAt: formatter.string(from: Date()),
+                label: labels[String(i)]
             ))
         }
 
-        let manifest = Manifest(entries: entries)
+        let manifest = Manifest(version: Manifest.currentVersion, entries: entries)
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         let data = try encoder.encode(manifest)
