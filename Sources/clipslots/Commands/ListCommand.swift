@@ -6,11 +6,23 @@ struct List: ParsableCommand {
         abstract: "Show all slots with content preview"
     )
 
+    @Option(name: .long, help: "Filter slots whose label or preview contains the pattern (case-insensitive).")
+    var grep: String?
+
     mutating func run() throws {
         let config = try ConfigManager.load()
         let storage = try SlotStorage(slotCount: config.slots)
 
-        let rows = collectRows(storage: storage, slotCount: config.slots)
+        var rows = collectRows(storage: storage, slotCount: config.slots)
+        if let pattern = grep, !pattern.isEmpty {
+            let needle = pattern.lowercased()
+            rows = rows.filter { row in
+                if let label = row.label, label.lowercased().contains(needle) { return true }
+                if let description = row.description, description.lowercased().contains(needle) { return true }
+                return false
+            }
+        }
+
         let useColor = isatty(fileno(stdout)) != 0
         let maxLabelWidth = rows.compactMap { $0.label?.count }.max() ?? 0
         let showLabelColumn = maxLabelWidth > 0
