@@ -57,11 +57,35 @@ jobs:
         run: |
           tar czf "clipslots-${{ steps.version.outputs.VERSION }}-universal.tar.gz" clipslots
 
+      - name: Extract changelog section
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          # Pull the lines between `## [VERSION]` and the next `## [` header.
+          SECTION=$(awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { capture=1; next }
+            capture && /^## \[/        { exit }
+            capture                    { print }
+          ' CHANGELOG.md)
+          # Trim leading/trailing blank lines.
+          SECTION=$(printf '%s\n' "$SECTION" | awk 'NF {p=1} p' | awk 'BEGIN{RS=""} {print}')
+          {
+            echo 'NOTES<<CHANGELOG_EOF'
+            if [ -n "$SECTION" ]; then
+              echo "## What's new in ${VERSION}"
+              echo
+              echo "$SECTION"
+              echo
+            fi
+            echo 'CHANGELOG_EOF'
+          } >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: ClipSlots ${{ steps.version.outputs.VERSION }}
           body: |
+            ${{ steps.changelog.outputs.NOTES }}
             ## Install
 
             **Option A — Download the installer (recommended)**
