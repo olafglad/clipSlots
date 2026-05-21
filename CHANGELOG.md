@@ -5,6 +5,27 @@ All notable changes to ClipSlots are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## How to update
+
+**Before tagging a release, add a new `## [X.Y.Z] - YYYY-MM-DD` section
+below** describing what shipped (use `### Added`, `### Changed`,
+`### Fixed`, `### Removed` subsections as appropriate), plus a matching
+link reference at the bottom of the file. The release workflow
+(`.github/workflows/release.yml`) extracts the section matching the tag
+and prepends it to the GitHub Release body. If the section is missing,
+the release ships with only install instructions.
+
+## [1.3.0] - 2026-05-21
+
+### Added
+- `clipslots open <slot>` opens a slot in the most appropriate app:
+  text slots launch in `$EDITOR`, single files open in their default app,
+  multi-file slots reveal the first file in Finder, images open in
+  Preview, and rich text (RTF/HTML) opens in TextEdit/browser to
+  preserve formatting. Errors clearly when `$EDITOR` is unset for plain
+  text, when a stored file path no longer exists, or when the slot
+  contains only opaque binary data.
+
 ## [1.2.0] - 2026-05-20
 
 ### Added
@@ -41,6 +62,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.3.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.3.0
 [1.2.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.2.0
 [1.1.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.1.0
 [1.0.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.0.0
