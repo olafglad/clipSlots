@@ -151,6 +151,11 @@ class SlotStorage {
         return result
     }
 
+    /// Forces a rebuild of the manifest cache from on-disk slot state.
+    func refreshManifest() throws {
+        try updateManifest()
+    }
+
     func getManifest() -> Manifest? {
         guard let data = try? Data(contentsOf: Paths.manifestFile) else { return nil }
         return try? JSONDecoder().decode(Manifest.self, from: data)
