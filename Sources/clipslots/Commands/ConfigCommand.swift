@@ -31,6 +31,20 @@ struct ConfigCommand: ParsableCommand {
             print("Keybinds:")
             print("  Save:      \(config.keybinds.save)")
             print("  Paste:     \(config.keybinds.paste)")
+            if config.keybinds.append.isEmpty {
+                print("  Append:    off")
+                print("")
+                print("To enable append mode, uncomment these lines under")
+                print("[keybinds] in the config file (run with --edit):")
+                print("  append = \"ctrl+option+shift+{n}\"")
+                print("  append_separator = \"\\n\"")
+            } else {
+                print("  Append:    \(config.keybinds.append)")
+                let sepDesc = config.keybinds.append_separator
+                    .replacingOccurrences(of: "\n", with: "\\n")
+                    .replacingOccurrences(of: "\t", with: "\\t")
+                print("  Separator: \"\(sepDesc)\"")
+            }
             print("")
             print("Run 'clipslots config --edit' to open in editor.")
         }

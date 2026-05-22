@@ -9,6 +9,18 @@ struct Config: Codable {
     struct Keybinds: Codable {
         var save: String = "ctrl+option+{n}"
         var paste: String = "ctrl+{n}"
+        var append: String = ""
+        var append_separator: String = "\n"
+
+        init() {}
+
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            save = try c.decodeIfPresent(String.self, forKey: .save) ?? "ctrl+option+{n}"
+            paste = try c.decodeIfPresent(String.self, forKey: .paste) ?? "ctrl+{n}"
+            append = try c.decodeIfPresent(String.self, forKey: .append) ?? ""
+            append_separator = try c.decodeIfPresent(String.self, forKey: .append_separator) ?? "\n"
+        }
     }
 
     static var `default`: Config { Config() }
@@ -19,6 +31,9 @@ struct Config: Codable {
         }
         try validateKeybindPattern(keybinds.save, type: "save")
         try validateKeybindPattern(keybinds.paste, type: "paste")
+        if !keybinds.append.isEmpty {
+            try validateKeybindPattern(keybinds.append, type: "append")
+        }
     }
 
     private func validateKeybindPattern(_ pattern: String, type: String) throws {
@@ -93,6 +108,18 @@ verbose = true
 [keybinds]
 save = "ctrl+option+{n}"
 paste = "ctrl+{n}"
+
+# Optional: append-mode hotkey. Appends the current clipboard text to
+# slot N instead of overwriting it — useful for collecting snippets.
+# Uncomment the two lines below (remove the leading "#") to enable.
+#
+# Skipped silently when the target slot is locked, the slot's current
+# content is non-text, or the clipboard is non-text. Appending to an
+# empty slot acts as a normal save. Rich-text slots collapse to plain
+# text on append.
+#
+# append = "ctrl+option+shift+{n}"
+# append_separator = "\\n"
 """
 
     static func load() throws -> Config {

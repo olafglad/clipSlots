@@ -30,5 +30,9 @@ struct Status: ParsableCommand {
         print("Keybinds:")
         print("  Save:      \(config.keybinds.save)")
         print("  Paste:     \(config.keybinds.paste)")
+        let appendDesc = config.keybinds.append.isEmpty
+            ? "off (run 'clipslots config' to enable)"
+            : config.keybinds.append
+        print("  Append:    \(appendDesc)")
     }
 }
