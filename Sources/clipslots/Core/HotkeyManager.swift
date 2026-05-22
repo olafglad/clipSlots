@@ -66,6 +66,10 @@ class HotkeyManager {
     }
 
     private func handleSave(slot: Int) {
+        if storage.isLocked(slot) {
+            log("[\(timestamp())] Save slot \(slot): locked, skipping")
+            return
+        }
         let originalContent = clipboard.captureAll()
         let originalChangeCount = NSPasteboard.general.changeCount
 

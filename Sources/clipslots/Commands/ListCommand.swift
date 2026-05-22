@@ -26,9 +26,10 @@ struct List: ParsableCommand {
         let useColor = isatty(fileno(stdout)) != 0
         let maxLabelWidth = rows.compactMap { $0.label?.count }.max() ?? 0
         let showLabelColumn = maxLabelWidth > 0
+        let anyLocked = rows.contains { $0.locked }
 
         for row in rows {
-            print(format(row: row, labelWidth: maxLabelWidth, showLabelColumn: showLabelColumn, useColor: useColor))
+            print(format(row: row, labelWidth: maxLabelWidth, showLabelColumn: showLabelColumn, useColor: useColor, reserveLockColumn: anyLocked))
         }
     }
 
@@ -36,32 +37,43 @@ struct List: ParsableCommand {
         let slot: Int
         let label: String?
         let description: String?
+        let locked: Bool
     }
 
     private func collectRows(storage: SlotStorage, slotCount: Int) -> [Row] {
         var rows: [Row] = []
+        let locks = storage.lockedSlots()
         // Try manifest first for speed, fall back to loading slots
         if let manifest = storage.getManifest() {
             let slotEntries = Dictionary(uniqueKeysWithValues: manifest.entries.map { ($0.slot, $0) })
             for i in 1...slotCount {
                 if let entry = slotEntries[i] {
-                    rows.append(Row(slot: i, label: entry.label, description: entry.description))
+                    rows.append(Row(slot: i, label: entry.label, description: entry.description, locked: entry.locked ?? false))
                 } else {
-                    rows.append(Row(slot: i, label: storage.getLabel(i), description: nil))
+                    rows.append(Row(slot: i, label: storage.getLabel(i), description: nil, locked: locks.contains(i)))
                 }
             }
         } else {
             for i in 1...slotCount {
                 let label = storage.getLabel(i)
                 let description = storage.getSlot(i)?.contentDescription
-                rows.append(Row(slot: i, label: label, description: description))
+                rows.append(Row(slot: i, label: label, description: description, locked: locks.contains(i)))
             }
         }
         return rows
     }
 
-    private func format(row: Row, labelWidth: Int, showLabelColumn: Bool, useColor: Bool) -> String {
-        let slotColumn = "Slot \(row.slot)"
+    private func format(row: Row, labelWidth: Int, showLabelColumn: Bool, useColor: Bool, reserveLockColumn: Bool) -> String {
+        let lockGlyph = useColor ? "🔒" : "[L]"
+        // Pad spaces wide enough to keep alignment when a glyph is absent.
+        let lockSpacer = useColor ? "  " : "   "
+        let lockColumn: String
+        if reserveLockColumn {
+            lockColumn = " " + (row.locked ? lockGlyph : lockSpacer)
+        } else {
+            lockColumn = ""
+        }
+        let slotColumn = "Slot \(row.slot)\(lockColumn)"
         let description = row.description ?? "(empty)"
 
         guard showLabelColumn else {
