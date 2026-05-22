@@ -15,6 +15,17 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.4.0] - 2026-05-22
+
+### Added
+- `clipslots export <path>` writes all slots (including labels and
+  manifest) to a tar archive at the given path. Refuses to overwrite an
+  existing file.
+- `clipslots import <path>` restores slots from a tar archive produced
+  by `export`. Refuses to overwrite non-empty slots unless `--force` is
+  passed. The existing `slots/` directory is renamed aside during the
+  swap and restored if the move fails.
+
 ## [1.3.0] - 2026-05-21
 
 ### Added
@@ -62,6 +73,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.4.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.4.0
 [1.3.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.3.0
 [1.2.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.2.0
 [1.1.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.1.0
