@@ -1,5 +1,16 @@
 import Foundation
 
+enum SlotStorageError: Error, LocalizedError {
+    case slotLocked(Int)
+
+    var errorDescription: String? {
+        switch self {
+        case .slotLocked(let n):
+            return "Slot \(n) is locked. Run `clipslots unlock \(n)` first."
+        }
+    }
+}
+
 class SlotStorage {
     private let slotCount: Int
     private let fm = FileManager.default
@@ -49,6 +60,45 @@ class SlotStorage {
         labels.removeValue(forKey: String(slotNumber))
     }
 
+    // MARK: - Locks
+
+    /// Returns true when the slot is currently locked.
+    func isLocked(_ slotNumber: Int) -> Bool {
+        loadLocks().contains(slotNumber)
+    }
+
+    /// Returns the set of currently locked slot numbers.
+    func lockedSlots() -> Set<Int> {
+        loadLocks()
+    }
+
+    /// Locks or unlocks a slot.
+    func setLocked(_ slotNumber: Int, locked: Bool) throws {
+        var locks = loadLocks()
+        if locked {
+            locks.insert(slotNumber)
+        } else {
+            locks.remove(slotNumber)
+        }
+        try writeLocks(locks)
+        try updateManifest()
+    }
+
+    private func loadLocks() -> Set<Int> {
+        guard let data = try? Data(contentsOf: Paths.locksFile),
+              let array = try? JSONDecoder().decode([Int].self, from: data) else {
+            return []
+        }
+        return Set(array)
+    }
+
+    private func writeLocks(_ locks: Set<Int>) throws {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        let data = try encoder.encode(locks.sorted())
+        try data.write(to: Paths.locksFile, options: .atomic)
+    }
+
     // MARK: - Public API
 
     func getSlot(_ slotNumber: Int) -> SlotContent? {
@@ -84,6 +134,9 @@ class SlotStorage {
     }
 
     func setSlot(_ slotNumber: Int, content: SlotContent) throws {
+        if isLocked(slotNumber) {
+            throw SlotStorageError.slotLocked(slotNumber)
+        }
         let slotDir = Paths.slotDirectory(slotNumber)
         let tempDir = Paths.slotsDirectory.appendingPathComponent(".tmp_\(slotNumber)_\(ProcessInfo.processInfo.processIdentifier)")
 
@@ -117,6 +170,9 @@ class SlotStorage {
     }
 
     func clearSlot(_ slotNumber: Int) throws {
+        if isLocked(slotNumber) {
+            throw SlotStorageError.slotLocked(slotNumber)
+        }
         let slotDir = Paths.slotDirectory(slotNumber)
         if fm.fileExists(atPath: slotDir.path) {
             try fm.removeItem(at: slotDir)
@@ -127,14 +183,25 @@ class SlotStorage {
         try updateManifest()
     }
 
-    func clearAll() throws {
+    /// Clears every slot, optionally skipping locked slots.
+    /// When `respectLocks` is false, locks themselves are also wiped.
+    func clearAll(respectLocks: Bool) throws {
+        let locks = loadLocks()
+        var labels = loadLabels()
         for i in 1...slotCount {
+            if respectLocks && locks.contains(i) { continue }
             let slotDir = Paths.slotDirectory(i)
             if fm.fileExists(atPath: slotDir.path) {
                 try fm.removeItem(at: slotDir)
             }
+            labels.removeValue(forKey: String(i))
         }
-        try writeLabels([:])
+        try writeLabels(labels)
+        if respectLocks {
+            // Keep existing locks intact.
+        } else {
+            try writeLocks([])
+        }
         try updateManifest()
     }
 
@@ -171,6 +238,7 @@ class SlotStorage {
         var entries: [ManifestEntry] = []
         let formatter = ISO8601DateFormatter()
         let labels = loadLabels()
+        let locks = loadLocks()
 
         for i in 1...slotCount {
             guard let content = getSlot(i) else { continue }
@@ -184,7 +252,8 @@ class SlotStorage {
                 totalBytes: totalBytes,
                 itemCount: content.items.count,
                 updatedAt: formatter.string(from: Date()),
-                label: labels[String(i)]
+                label: labels[String(i)],
+                locked: locks.contains(i) ? true : nil
             ))
         }
 

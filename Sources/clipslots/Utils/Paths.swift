@@ -33,6 +33,10 @@ struct Paths {
         slotsDirectory.appendingPathComponent("labels.json")
     }
 
+    static var locksFile: URL {
+        slotsDirectory.appendingPathComponent("locks.json")
+    }
+
     static func slotDirectory(_ slot: Int) -> URL {
         slotsDirectory.appendingPathComponent(String(slot))
     }

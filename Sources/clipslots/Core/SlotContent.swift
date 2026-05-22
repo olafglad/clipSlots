@@ -100,6 +100,7 @@ struct ManifestEntry: Codable {
     let itemCount: Int
     let updatedAt: String
     let label: String?
+    let locked: Bool?
 }
 
 struct Manifest: Codable {

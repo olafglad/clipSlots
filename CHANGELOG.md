@@ -15,6 +15,25 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.5.0] - 2026-05-22
+
+### Added
+- `clipslots lock <slot>` marks a slot read-only; subsequent save hotkey
+  presses for that slot log "locked, skipping" and `clipslots save <slot>`
+  exits non-zero with a hint to unlock first. `clipslots unlock <slot>`
+  clears the lock.
+- Locked slots display a 🔒 marker (or `[L]` when piped) next to the slot
+  number in `clipslots list`.
+- `clipslots clear` is now lock-aware: clearing a single locked slot
+  refuses unless `--force` is passed. `clipslots clear` with locked slots
+  present prompts interactively with three options (clear all, keep
+  locked, abort). The new `--force` flag clears every slot including
+  locked ones, and `--keep-locked` clears only unlocked slots. In
+  non-interactive contexts with locked slots present, `clear` refuses
+  with a message pointing at the flags.
+- Lock state is persisted at `~/.local/share/clipslots/slots/locks.json`
+  and surfaced as an optional `locked` field on each manifest entry.
+
 ## [1.4.0] - 2026-05-22
 
 ### Added
@@ -73,6 +92,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.5.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.5.0
 [1.4.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.4.0
 [1.3.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.3.0
 [1.2.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.2.0
