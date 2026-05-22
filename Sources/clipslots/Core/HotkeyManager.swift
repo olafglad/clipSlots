@@ -19,7 +19,8 @@ class HotkeyManager {
         self.config = newConfig
         self.storage = newStorage
         registerHotkeys()
-        log("[\(timestamp())] Config reloaded: \(newConfig.slots) slots, save=\(newConfig.keybinds.save), paste=\(newConfig.keybinds.paste)")
+        let appendDesc = newConfig.keybinds.append.isEmpty ? "off" : newConfig.keybinds.append
+        log("[\(timestamp())] Config reloaded: \(newConfig.slots) slots, save=\(newConfig.keybinds.save), paste=\(newConfig.keybinds.paste), append=\(appendDesc)")
     }
 
     func registerHotkeys() {
@@ -30,6 +31,10 @@ class HotkeyManager {
                 hotkeys.append(hk)
             }
             if let hk = createHotkey(pattern: config.keybinds.paste, slot: slot, action: .paste) {
+                hotkeys.append(hk)
+            }
+            if !config.keybinds.append.isEmpty,
+               let hk = createHotkey(pattern: config.keybinds.append, slot: slot, action: .append) {
                 hotkeys.append(hk)
             }
         }
@@ -43,7 +48,7 @@ class HotkeyManager {
 
     // MARK: - Private
 
-    private enum Action { case save, paste }
+    private enum Action { case save, paste, append }
 
     private func createHotkey(pattern: String, slot: Int, action: Action) -> HotKey? {
         guard let (key, modifiers) = parseKeybind(pattern: pattern, slot: slot) else {
@@ -57,8 +62,9 @@ class HotkeyManager {
         hotkey.keyDownHandler = { [weak self] in
             guard let self = self else { return }
             switch action {
-            case .save:  self.handleSave(slot: capturedSlot)
-            case .paste: self.handlePaste(slot: capturedSlot)
+            case .save:   self.handleSave(slot: capturedSlot)
+            case .paste:  self.handlePaste(slot: capturedSlot)
+            case .append: self.handleAppend(slot: capturedSlot)
             }
         }
 
@@ -104,6 +110,80 @@ class HotkeyManager {
             }
         } catch {
             log("[\(timestamp())] Error saving to slot \(slot): \(error.localizedDescription)")
+        }
+    }
+
+    private func handleAppend(slot: Int) {
+        if storage.isLocked(slot) {
+            log("[\(timestamp())] Append slot \(slot): locked, skipping")
+            return
+        }
+
+        let originalContent = clipboard.captureAll()
+        let originalChangeCount = NSPasteboard.general.changeCount
+
+        simulateKeyPress(key: CGKeyCode(8), flags: .maskCommand) // Cmd+C
+        usleep(100_000)
+
+        let newChangeCount = NSPasteboard.general.changeCount
+        let incoming: SlotContent
+        if newChangeCount != originalChangeCount,
+           let freshContent = clipboard.captureAll(), !freshContent.isEmpty {
+            incoming = freshContent
+        } else if let existing = originalContent, !existing.isEmpty {
+            incoming = existing
+        } else {
+            if !AXIsProcessTrusted() {
+                log("[\(timestamp())] Append slot \(slot): no Accessibility permission")
+            } else {
+                log("[\(timestamp())] Append slot \(slot): clipboard is empty")
+            }
+            return
+        }
+
+        guard let incomingText = incoming.textPreview else {
+            log("[\(timestamp())] Append slot \(slot): incoming clipboard is non-text, skipping")
+            if newChangeCount != originalChangeCount, let original = originalContent {
+                _ = clipboard.restoreAll(original)
+            }
+            return
+        }
+
+        let existing = storage.getSlot(slot)
+        let merged: String
+        if let existing = existing {
+            guard let existingText = existing.textPreview else {
+                log("[\(timestamp())] Append slot \(slot): existing slot content is non-text, skipping")
+                if newChangeCount != originalChangeCount, let original = originalContent {
+                    _ = clipboard.restoreAll(original)
+                }
+                return
+            }
+            let existingTypes = Set(existing.items.flatMap { $0.representations.map { $0.typeString } })
+            let plainType = NSPasteboard.PasteboardType.string.rawValue
+            if existingTypes.contains(where: { $0 != plainType }) {
+                log("[\(timestamp())] Append slot \(slot): rich-text slot collapsed to plain on append")
+            }
+            merged = existingText + config.keybinds.append_separator + incomingText
+        } else {
+            merged = incomingText
+        }
+
+        let rep = PasteboardRepresentation(
+            typeString: NSPasteboard.PasteboardType.string.rawValue,
+            data: Data(merged.utf8)
+        )
+        let mergedContent = SlotContent(items: [PasteboardItemSnapshot(representations: [rep])])
+
+        do {
+            try storage.setSlot(slot, content: mergedContent)
+            log("[\(timestamp())] Appended to slot \(slot): \(mergedContent.contentDescription)")
+
+            if newChangeCount != originalChangeCount, let original = originalContent {
+                _ = clipboard.restoreAll(original)
+            }
+        } catch {
+            log("[\(timestamp())] Error appending to slot \(slot): \(error.localizedDescription)")
         }
     }
 

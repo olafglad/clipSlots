@@ -15,6 +15,27 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.6.0] - 2026-05-22
+
+### Added
+- Optional append-mode hotkey (`keybinds.append` in
+  `~/.config/clipslots/config.toml`). When set (e.g.
+  `"ctrl+option+shift+{n}"`), pressing the hotkey appends the current
+  clipboard text to slot N instead of overwriting it. Empty by default
+  — append is opt-in and existing setups are unchanged.
+- Configurable separator between existing slot text and the appended
+  text via `keybinds.append_separator` (default `"\n"`).
+
+### Behavior
+- Append skips with a log line (no destruction) when the target slot is
+  locked, when the existing slot contents are non-text, or when the
+  incoming clipboard is non-text.
+- Appending to an empty slot writes the incoming text as a normal save
+  (no leading separator).
+- Appending to a rich-text slot (RTF/HTML with plain-text fallback)
+  collapses the slot to pure plain text and logs the collapse.
+- `updatedAt` refreshes on each append (folds into TTL plans later).
+
 ## [1.5.0] - 2026-05-22
 
 ### Added
@@ -92,6 +113,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.6.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.6.0
 [1.5.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.5.0
 [1.4.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.4.0
 [1.3.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.3.0
