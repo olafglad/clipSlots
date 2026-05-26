@@ -15,6 +15,23 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.8.0] - 2026-05-26
+
+### Added
+- `clipslots list --verbose` / `-v` expands each slot into a multi-line
+  block showing byte size, full pasteboard type list, age (relative
+  time since last update), and lock state alongside the existing
+  description. Pure rendering — no storage or manifest changes. Default
+  compact output is unchanged when the flag is absent.
+
+### Behavior
+- Verbose output composes cleanly with `--grep`: filter is applied
+  first, then the matching slots render in verbose form.
+- Empty slots still render as `(empty)` with no metadata block.
+- Slots present on disk but missing from the manifest cache fall back
+  to header + description only; size/types/age require manifest data
+  (which is rebuilt on the next save).
+
 ## [1.7.0] - 2026-05-26
 
 ### Added
@@ -135,6 +152,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.8.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.8.0
 [1.7.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.7.0
 [1.6.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.6.0
 [1.5.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.5.0
