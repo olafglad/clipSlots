@@ -101,6 +101,7 @@ OPTIONS:
 SUBCOMMANDS:
   save                    Save current clipboard content to a slot
   paste                   Load slot content to clipboard
+  peek                    Print the text content of a slot to stdout
   list                    Show all slots with content preview
   clear                   Clear one or all slots
   start                   Start the ClipSlots daemon

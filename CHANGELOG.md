@@ -15,6 +15,28 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.7.0] - 2026-05-26
+
+### Added
+- `clipslots peek <slot>` prints the text content of a slot to stdout.
+  Designed for shell composition: `clipslots peek 3 | jq .`,
+  `diff <(clipslots peek 1) <(clipslots peek 2)`,
+  `TOKEN=$(clipslots peek 7)`, etc.
+- `--truncate N` flag on `peek` for opt-in character limiting (no
+  truncation by default so pipelines stay byte-faithful).
+
+### Behavior
+- A trailing newline is appended only when stdout is a TTY, so piped
+  output is byte-exact with the saved clipboard contents.
+- Empty slots exit 0 with no output (matches `cat /dev/null`).
+- Non-text slots (images, files, binary) print a one-line description
+  to stderr and exit 2; stdout stays empty so callers like `jq` see no
+  garbage input.
+- Invalid slot numbers exit with the standard argument-parser
+  validation error (exit 64).
+- Locked slots are readable — peek never mutates and is unaffected by
+  `lock` / `unlock`.
+
 ## [1.6.0] - 2026-05-22
 
 ### Added
@@ -113,6 +135,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.7.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.7.0
 [1.6.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.6.0
 [1.5.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.5.0
 [1.4.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.4.0
