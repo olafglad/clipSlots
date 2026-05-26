@@ -245,13 +245,21 @@ class SlotStorage {
             let allTypes = Array(Set(content.items.flatMap { $0.representations.map { $0.typeString } }))
             let totalBytes = content.items.flatMap { $0.representations }.reduce(0) { $0 + $1.data.count }
 
+            // Source of truth for "when was this slot last written" is the
+            // per-slot directory's mtime. setSlot atomically renames a temp
+            // dir into place, which updates mtime correctly. Stamping
+            // Date() here would re-stamp every slot on every manifest
+            // rebuild, making all ages look identical.
+            let slotDir = Paths.slotDirectory(i)
+            let mtime = (try? fm.attributesOfItem(atPath: slotDir.path)[.modificationDate] as? Date) ?? Date()
+
             entries.append(ManifestEntry(
                 slot: i,
                 description: content.contentDescription,
                 types: allTypes,
                 totalBytes: totalBytes,
                 itemCount: content.items.count,
-                updatedAt: formatter.string(from: Date()),
+                updatedAt: formatter.string(from: mtime),
                 label: labels[String(i)],
                 locked: locks.contains(i) ? true : nil
             ))

@@ -15,6 +15,18 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.8.1] - 2026-05-26
+
+### Fixed
+- `clipslots list -v` now shows accurate per-slot ages. Previously the
+  manifest rebuild stamped every entry with the current wall-clock
+  time, so all slots reported the same `age` (whatever moment the
+  manifest was last rebuilt). The manifest now reads each slot
+  directory's modification time — which `setSlot`'s atomic rename
+  pattern keeps correct — so ages reflect when each slot was actually
+  written. Pre-1.8.1 ages will normalise after the next save (which
+  triggers a fresh manifest rebuild).
+
 ## [1.8.0] - 2026-05-26
 
 ### Added
@@ -152,6 +164,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.8.1]: https://github.com/olafglad/clipSlots/releases/tag/v1.8.1
 [1.8.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.8.0
 [1.7.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.7.0
 [1.6.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.6.0
