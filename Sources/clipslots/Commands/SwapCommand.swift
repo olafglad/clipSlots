@@ -3,7 +3,11 @@ import Foundation
 
 struct Swap: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Swap the contents of two slots"
+        abstract: "Swap the contents of two slots",
+        discussion: """
+            Example:
+              clipslots swap 1 4   # exchange slot 1 and slot 4
+            """
     )
 
     @Argument(help: "First slot")

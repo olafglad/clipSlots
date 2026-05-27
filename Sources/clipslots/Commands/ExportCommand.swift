@@ -4,7 +4,11 @@ import Foundation
 struct Export: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "export",
-        abstract: "Export all slots to a tar archive"
+        abstract: "Export all slots to a tar archive",
+        discussion: """
+            Example:
+              clipslots export ~/clipslots-backup.tar
+            """
     )
 
     @Argument(help: "Destination archive path (e.g. slots.tar)")

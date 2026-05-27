@@ -3,7 +3,12 @@ import Foundation
 
 struct Label: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Set or clear a human-readable label for a slot"
+        abstract: "Set or clear a human-readable label for a slot",
+        discussion: """
+            Examples:
+              clipslots label 3 "API token"
+              clipslots label 3 --clear
+            """
     )
 
     @Argument(help: "Slot number to label")

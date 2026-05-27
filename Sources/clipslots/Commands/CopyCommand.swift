@@ -3,7 +3,11 @@ import Foundation
 
 struct Copy: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Copy the contents of one slot into another"
+        abstract: "Copy the contents of one slot into another",
+        discussion: """
+            Example:
+              clipslots copy 1 4   # duplicate slot 1 into slot 4
+            """
     )
 
     @Argument(help: "Source slot")

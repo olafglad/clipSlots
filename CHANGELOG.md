@@ -15,6 +15,48 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.13.0] - 2026-05-27
+
+### Fixed
+- Config silently falling back to defaults: every command used to print
+  `Warning: Could not parse config: ... Using defaults.` whenever the
+  TOML omitted any optional key (e.g. a missing `expire_after_hours` or
+  `feedback`). Root cause was Swift's synthesized `Codable` init not
+  honoring `decodeIfPresent` semantics through TOMLDecoder 0.2.2.
+  `Config` now has an explicit `init(from:)` mirroring the existing
+  `Keybinds` pattern; partial configs decode without warnings and the
+  daemon actually uses the values from the file.
+
+### Added
+- `clipslots status` rewritten as a fastfetch-style two-column layout:
+  ASCII logo on the left, four sections (Daemon, Permissions, Slots,
+  Keybinds) on the right. Includes daemon PID and uptime when running,
+  ●/○ indicators for binary state, and the configured/used/locked slot
+  counts. Stacks plain text (no logo) when piped, under `NO_COLOR=1`,
+  or in a narrow terminal.
+- `clipslots config` is now a parent command with three subcommands:
+  - `clipslots config edit` — opens the config file in `$EDITOR`
+    (replaces the old `--edit` flag; the flag is kept hidden for
+    backward compat).
+  - `clipslots config validate` — parses + validates the config file,
+    exits 0 with "Config OK" or exits 1 with a specific error and the
+    file path on stderr. Useful in pre-commit hooks and CI.
+  - `clipslots config path` — prints the absolute path to the config
+    file. Script-friendly: `cd "$(dirname "$(clipslots config path)")"`.
+- Per-command usage examples (`discussion:` text under `--help`) for
+  `save`, `paste`, `peek`, `list`, `open`, `label`, `lock`, `unlock`,
+  `undo`, `swap`, `copy`, `export`, `import`, `clear`, `status`, and
+  every `config` subcommand.
+
+### Changed
+- Central styling module (`Core/Style.swift`) replaces ad-hoc ANSI in
+  `list`. Honors `NO_COLOR` (force off), `CLICOLOR_FORCE=1` (force on),
+  and `isatty` (default). No visible change to `clipslots list`; this
+  unblocks consistent styling across future commands.
+- `clipslots config` output reuses the same section-header /
+  key-value layout as the new `status` view (no logo). Now also surfaces
+  `expire_after_hours` and `feedback` values directly.
+
 ## [1.12.0] - 2026-05-27
 
 ### Added
@@ -250,6 +292,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.13.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.13.0
 [1.12.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.12.0
 [1.11.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.11.0
 [1.10.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.10.0

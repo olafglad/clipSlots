@@ -3,7 +3,11 @@ import Foundation
 
 struct Save: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Save current clipboard content to a slot"
+        abstract: "Save current clipboard content to a slot",
+        discussion: """
+            Example:
+              clipslots save 3   # store the current clipboard in slot 3
+            """
     )
 
     @Argument(help: "Slot number to save to")
