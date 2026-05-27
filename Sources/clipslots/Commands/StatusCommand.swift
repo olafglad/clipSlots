@@ -17,8 +17,20 @@ struct Status: ParsableCommand {
     mutating func run() throws {
         let report = gather()
         let sectionLines = renderSections(report)
-        let output = Layout.render(logo: colorizedLogo(), sections: sectionLines)
+        let logo = verticallyCentered(colorizedLogo(), toHeight: sectionLines.count)
+        let output = Layout.render(logo: logo, sections: sectionLines)
         print(output)
+    }
+
+    /// Pad a logo with blank lines top and bottom so it sits vertically
+    /// centered against a taller sections column. No-op if the logo is
+    /// already as tall as (or taller than) the target.
+    private func verticallyCentered(_ logo: [String], toHeight target: Int) -> [String] {
+        guard target > logo.count else { return logo }
+        let extra = target - logo.count
+        let top = extra / 2
+        let bottom = extra - top
+        return Array(repeating: "", count: top) + logo + Array(repeating: "", count: bottom)
     }
 
     // MARK: - Data
@@ -67,7 +79,7 @@ struct Status: ParsableCommand {
     // MARK: - Rendering
 
     private func colorizedLogo() -> [String] {
-        logoLines.map { Style.color(.cyan, $0) }
+        logoLines.map { Style.color(.magenta, $0) }
     }
 
     private func renderSections(_ r: Report) -> [String] {

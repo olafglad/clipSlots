@@ -15,6 +15,18 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.13.1] - 2026-05-27
+
+### Changed
+- `clipslots status` logo redrawn as an actual clipboard silhouette: a
+  rounded clip on top, paper rectangle below, and the 3×3 slot grid
+  nested inside. Rendered in magenta to match the project's brand color
+  (favicon). Section headers stay cyan; ●/○ indicators keep their
+  semantic green/red.
+- The logo is now vertically centered against the sections column
+  instead of top-anchored, so the two-column layout looks balanced
+  regardless of how many lines the right side prints.
+
 ## [1.13.0] - 2026-05-27
 
 ### Fixed
@@ -292,6 +304,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.13.1]: https://github.com/olafglad/clipSlots/releases/tag/v1.13.1
 [1.13.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.13.0
 [1.12.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.12.0
 [1.11.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.11.0
