@@ -1,0 +1,852 @@
+<!doctype html>
+<html lang="en" class="theme-dark">
+  <head>
+    <meta charset="utf-8" />
+    <title>ClipSlots — Documentation</title>
+    <meta
+      content="Full command reference and configuration guide for ClipSlots, the macOS clipboard slot manager."
+      name="description"
+    />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ClipSlots" />
+    <meta property="og:title" content="ClipSlots — Documentation" />
+    <meta
+      property="og:description"
+      content="Full command reference and configuration guide for ClipSlots."
+    />
+    <meta
+      property="og:image"
+      content="https://clipslots.dev/images/og-image.png"
+    />
+    <meta property="og:url" content="https://clipslots.dev/docs/" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="../images/favicon/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="../images/favicon/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../images/favicon/apple-touch-icon.png"
+    />
+    <link rel="manifest" href="../images/favicon/site.webmanifest" />
+
+    <!-- Fonts -->
+    <link
+      rel="preload"
+      href="../fonts/InterVariable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+
+    <!-- Styles -->
+    <link href="../vendor/font-awesome-6.7.2/css/all.min.css" rel="stylesheet" />
+    <link href="../css/index.css" rel="stylesheet" type="text/css" />
+    <link href="../css/tablet.css" rel="stylesheet" type="text/css" />
+    <link href="../css/mobile.css" rel="stylesheet" type="text/css" />
+    <link href="../css/docs.css" rel="stylesheet" type="text/css" />
+    <script src="../js/main.js" type="text/javascript" defer></script>
+    <script src="../js/docs.js" type="text/javascript" defer></script>
+    <script
+      data-goatcounter="https://clipslots.goatcounter.com/count"
+      async
+      src="//gc.zgo.at/count.js"
+    ></script>
+  </head>
+
+  <body class="docs-body">
+    <div class="background-gradient"></div>
+    <div class="page-container">
+      <header class="nav-container">
+        <a href="../" class="nav-brand">
+          <span class="brand-text">ClipSlots</span>
+        </a>
+        <nav role="navigation" class="nav-menu" data-navigation>
+          <a href="../#features" class="nav-link">Features</a>
+          <a href="../#install" class="nav-link">Install</a>
+          <a href="./" class="nav-link active">Docs</a>
+          <div class="button-group stacked margin-top-l mobile-only">
+            <a
+              href="https://github.com/olafglad/clipSlots"
+              class="button primary"
+              target="_blank"
+            >
+              <div class="fa-brands fa-github icon m"></div>
+              View on GitHub
+            </a>
+          </div>
+        </nav>
+        <div class="button-group">
+          <a
+            href="https://github.com/olafglad/clipSlots"
+            class="button ghost compact hide-on-mobile"
+            target="_blank"
+            aria-label="GitHub"
+          >
+            <div class="fa-brands fa-github icon l"></div>
+          </a>
+          <a href="../#install" class="button primary compact">Install</a>
+          <button
+            class="button ghost compact nav-hamburger"
+            data-mobile-toggle
+            aria-label="Show menu"
+          >
+            <span class="fa-solid fa-bars icon m"></span>
+          </button>
+        </div>
+      </header>
+
+      <main class="docs-layout">
+        <!-- Sidebar -->
+        <aside class="docs-sidebar" data-docs-sidebar>
+          <button
+            class="docs-sidebar-toggle"
+            data-docs-sidebar-toggle
+            aria-label="Show docs navigation"
+          >
+            <span class="fa-solid fa-list icon m"></span>
+            On this page
+          </button>
+          <nav class="docs-nav" aria-label="Documentation navigation">
+            <div class="docs-nav-group">
+              <p class="docs-nav-title">Getting Started</p>
+              <a href="#install" class="docs-nav-link">Install</a>
+              <a href="#first-time" class="docs-nav-link">First-time setup</a>
+              <a href="#keybinds" class="docs-nav-link">Keybind syntax</a>
+            </div>
+
+            <div class="docs-nav-group">
+              <p class="docs-nav-title">Daemon</p>
+              <a href="#start" class="docs-nav-link"><code>start</code></a>
+              <a href="#stop" class="docs-nav-link"><code>stop</code></a>
+              <a href="#restart" class="docs-nav-link"><code>restart</code></a>
+              <a href="#status" class="docs-nav-link"><code>status</code></a>
+              <a href="#permissions" class="docs-nav-link"><code>permissions</code></a>
+            </div>
+
+            <div class="docs-nav-group">
+              <p class="docs-nav-title">Slots</p>
+              <a href="#save" class="docs-nav-link"><code>save</code></a>
+              <a href="#paste" class="docs-nav-link"><code>paste</code></a>
+              <a href="#peek" class="docs-nav-link"><code>peek</code></a>
+              <a href="#list" class="docs-nav-link"><code>list</code></a>
+              <a href="#open" class="docs-nav-link"><code>open</code></a>
+              <a href="#clear" class="docs-nav-link"><code>clear</code></a>
+            </div>
+
+            <div class="docs-nav-group">
+              <p class="docs-nav-title">Organize</p>
+              <a href="#label" class="docs-nav-link"><code>label</code></a>
+              <a href="#lock" class="docs-nav-link"><code>lock</code></a>
+              <a href="#unlock" class="docs-nav-link"><code>unlock</code></a>
+              <a href="#swap" class="docs-nav-link"><code>swap</code></a>
+              <a href="#copy" class="docs-nav-link"><code>copy</code></a>
+              <a href="#undo" class="docs-nav-link"><code>undo</code></a>
+            </div>
+
+            <div class="docs-nav-group">
+              <p class="docs-nav-title">Backup</p>
+              <a href="#export" class="docs-nav-link"><code>export</code></a>
+              <a href="#import" class="docs-nav-link"><code>import</code></a>
+            </div>
+
+            <div class="docs-nav-group">
+              <p class="docs-nav-title">Config</p>
+              <a href="#config" class="docs-nav-link"><code>config</code></a>
+              <a href="#config-edit" class="docs-nav-link"><code>config edit</code></a>
+              <a href="#config-validate" class="docs-nav-link"><code>config validate</code></a>
+              <a href="#config-path" class="docs-nav-link"><code>config path</code></a>
+            </div>
+
+            <div class="docs-nav-group">
+              <p class="docs-nav-title">Configuration</p>
+              <a href="#config-schema" class="docs-nav-link">config.toml schema</a>
+              <a href="#append-mode" class="docs-nav-link">Append mode</a>
+              <a href="#expiry" class="docs-nav-link">Slot expiry</a>
+              <a href="#feedback" class="docs-nav-link">Sound feedback</a>
+            </div>
+
+            <div class="docs-nav-group">
+              <p class="docs-nav-title">Reference</p>
+              <a href="#troubleshooting" class="docs-nav-link">Troubleshooting</a>
+              <a href="#file-paths" class="docs-nav-link">File paths</a>
+            </div>
+          </nav>
+        </aside>
+
+        <!-- Content -->
+        <article class="docs-content">
+          <header class="docs-header">
+            <p class="docs-eyebrow">Documentation</p>
+            <h1 class="docs-h1">ClipSlots reference</h1>
+            <p class="paragraph m secondary">
+              Every command, every config option. For the 30-second pitch see
+              <a href="../" class="color-teal">clipslots.dev</a>.
+            </p>
+          </header>
+
+          <!-- ============================================================ -->
+          <!-- Getting Started                                              -->
+          <!-- ============================================================ -->
+          <section class="docs-section">
+            <h2 class="docs-h2">Getting started</h2>
+
+            <article class="docs-block" id="install">
+              <h3 class="docs-h3">
+                Install
+                <a href="#install" class="docs-anchor" aria-label="Link to Install">#</a>
+              </h3>
+              <p class="paragraph m secondary">
+                Install via Homebrew, grant accessibility, start the daemon.
+                Three commands, ~30 seconds.
+              </p>
+              <pre class="docs-code"><code><span class="c">$</span> brew tap olafglad/clipslots
+<span class="c">$</span> brew install clipslots
+<span class="c">$</span> clipslots permissions   <span class="comment"># grant accessibility (one-time)</span>
+<span class="c">$</span> clipslots start</code></pre>
+              <p class="paragraph s secondary">
+                Other install methods (<code class="inline-code">.pkg</code> download, build from source) are
+                listed on the
+                <a
+                  href="https://github.com/olafglad/clipSlots/releases/latest"
+                  class="color-teal"
+                  target="_blank"
+                  >GitHub releases page</a
+                >.
+              </p>
+            </article>
+
+            <article class="docs-block" id="first-time">
+              <h3 class="docs-h3">
+                First-time setup
+                <a href="#first-time" class="docs-anchor" aria-label="Link to First-time setup">#</a>
+              </h3>
+              <p class="paragraph m secondary">
+                ClipSlots needs macOS accessibility permission to register
+                global hotkeys. Without it, the daemon runs but hotkeys do
+                nothing.
+              </p>
+              <ol class="paragraph m secondary">
+                <li>
+                  Run <code class="inline-code">clipslots permissions</code> —
+                  it opens System&nbsp;Settings&nbsp;→&nbsp;Privacy&nbsp;&amp;&nbsp;Security&nbsp;→&nbsp;Accessibility.
+                </li>
+                <li>
+                  Find <code class="inline-code">clipslots</code> in the list
+                  and toggle it on.
+                </li>
+                <li>
+                  Run <code class="inline-code">clipslots start</code>. The
+                  daemon launches and registers your hotkeys. It will also
+                  start on login from now on.
+                </li>
+                <li>
+                  Copy something, press <kbd>Ctrl</kbd>+<kbd>Option</kbd>+<kbd>1</kbd>, then
+                  press <kbd>Ctrl</kbd>+<kbd>1</kbd> to paste it back.
+                </li>
+              </ol>
+            </article>
+
+            <article class="docs-block" id="keybinds">
+              <h3 class="docs-h3">
+                Keybind syntax
+                <a href="#keybinds" class="docs-anchor" aria-label="Link to Keybind syntax">#</a>
+              </h3>
+              <p class="paragraph m secondary">
+                Hotkeys are configured in
+                <code class="inline-code">~/.config/clipslots/config.toml</code>
+                under <code class="inline-code">[keybinds]</code>. Each value
+                is a string with <code class="inline-code">+</code>-separated
+                modifiers and one key. Use
+                <code class="inline-code">{n}</code> as a placeholder for the
+                slot number — ClipSlots registers one hotkey per slot
+                (1&nbsp;through your configured <code class="inline-code">slots</code> count).
+              </p>
+              <div class="docs-table-wrapper">
+                <table class="docs-table">
+                  <thead>
+                    <tr><th>Modifiers</th><th>Keys</th><th>Placeholder</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code class="inline-code">ctrl</code>, <code class="inline-code">option</code>, <code class="inline-code">cmd</code>, <code class="inline-code">shift</code></td>
+                      <td><code class="inline-code">0-9</code>, <code class="inline-code">a-z</code>, <code class="inline-code">f1-f12</code></td>
+                      <td><code class="inline-code">{n}</code> = slot number</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="paragraph m secondary">Examples:</p>
+              <pre class="docs-code"><code><span class="comment"># Default: Ctrl+Option+N to save, Ctrl+N to paste</span>
+save  = "ctrl+option+{n}"
+paste = "ctrl+{n}"
+
+<span class="comment"># Cmd+Shift+N to save, F-keys to paste</span>
+save  = "cmd+shift+{n}"
+paste = "f{n}"</code></pre>
+              <p class="paragraph s secondary">
+                Config changes hot-reload — no restart needed. If a binding
+                conflicts with another app, the daemon logs a warning and
+                skips that slot.
+              </p>
+            </article>
+          </section>
+
+          <!-- ============================================================ -->
+          <!-- Daemon commands                                              -->
+          <!-- ============================================================ -->
+          <section class="docs-section">
+            <h2 class="docs-h2">Daemon</h2>
+
+            <article class="docs-block" id="start">
+              <h3 class="docs-h3"><code>start</code><a href="#start" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">Start the ClipSlots daemon and install a launchd agent so it boots on login.</p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots start</code></pre>
+            </article>
+
+            <article class="docs-block" id="stop">
+              <h3 class="docs-h3"><code>stop</code><a href="#stop" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">Stop the daemon and unload the launchd agent. Hotkeys go inert until you <code class="inline-code">start</code> again.</p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots stop</code></pre>
+            </article>
+
+            <article class="docs-block" id="restart">
+              <h3 class="docs-h3"><code>restart</code><a href="#restart" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">Stop the daemon, then start it again. Useful after a manual binary swap. Most config changes hot-reload, so you rarely need this.</p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots restart</code></pre>
+            </article>
+
+            <article class="docs-block" id="status">
+              <h3 class="docs-h3"><code>status</code><a href="#status" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Show daemon state, accessibility permission, slot usage, and active keybinds. In a wide colour TTY it renders a fastfetch-style layout with the ClipSlots ASCII logo; piped output or
+                <code class="inline-code">NO_COLOR=1</code> falls back to plain stacked sections.
+              </p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots status</code></pre>
+            </article>
+
+            <article class="docs-block" id="permissions">
+              <h3 class="docs-h3"><code>permissions</code><a href="#permissions" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Check accessibility and pasteboard permission state, and open
+                System&nbsp;Settings&nbsp;→&nbsp;Privacy&nbsp;&amp;&nbsp;Security if accessibility is not granted yet. Idempotent — safe to run any time.
+              </p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots permissions</code></pre>
+            </article>
+          </section>
+
+          <!-- ============================================================ -->
+          <!-- Slot commands                                                -->
+          <!-- ============================================================ -->
+          <section class="docs-section">
+            <h2 class="docs-h2">Slots</h2>
+
+            <article class="docs-block" id="save">
+              <h3 class="docs-h3"><code>save</code><a href="#save" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Save the current clipboard contents into a slot. Works with
+                text, images, RTF, HTML, and file references — whatever the
+                pasteboard holds. The equivalent of pressing your
+                <em>save</em> hotkey.
+              </p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots save <span class="arg">&lt;slot&gt;</span></code></pre>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots save 3
+<span class="c">$</span> echo "hi" | pbcopy &amp;&amp; clipslots save 5</code></pre>
+              <p class="paragraph s secondary">Refuses to overwrite locked slots. Saving an empty clipboard is a no-op.</p>
+            </article>
+
+            <article class="docs-block" id="paste">
+              <h3 class="docs-h3"><code>paste</code><a href="#paste" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">Load a slot's content back onto the system clipboard. The equivalent of pressing your <em>paste</em> hotkey.</p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots paste <span class="arg">&lt;slot&gt;</span></code></pre>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots paste 3</code></pre>
+            </article>
+
+            <article class="docs-block" id="peek">
+              <h3 class="docs-h3"><code>peek</code><a href="#peek" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Print a slot's text content to stdout without touching the
+                clipboard. Useful for shell scripting and quick inspection.
+                Non-text slots (images, files) print a short type
+                description instead of binary data.
+              </p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots peek <span class="arg">&lt;slot&gt;</span> [--truncate &lt;N&gt;]</code></pre>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots peek 3
+<span class="c">$</span> TOKEN=$(clipslots peek 7)
+<span class="c">$</span> diff &lt;(clipslots peek 1) &lt;(clipslots peek 2)</code></pre>
+              <div class="docs-table-wrapper">
+                <table class="docs-table">
+                  <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline-code">--truncate N</code></td><td>Truncate output to N characters (no truncation by default).</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="docs-block" id="list">
+              <h3 class="docs-h3"><code>list</code><a href="#list" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Show every slot with a content preview, age, and (when colour
+                is on) a lock indicator. Use
+                <code class="inline-code">--verbose</code> for size and type
+                metadata, or <code class="inline-code">--grep</code> to filter.
+              </p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots list [--grep &lt;pattern&gt;] [--verbose]</code></pre>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots list
+<span class="c">$</span> clipslots list --verbose
+<span class="c">$</span> clipslots list --grep token</code></pre>
+              <div class="docs-table-wrapper">
+                <table class="docs-table">
+                  <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline-code">--grep PATTERN</code></td><td>Filter slots whose label or preview contains the pattern (case-insensitive).</td></tr>
+                    <tr><td><code class="inline-code">-v</code>, <code class="inline-code">--verbose</code></td><td>Show per-slot size, type, age, label, and lock state.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="docs-block" id="open">
+              <h3 class="docs-h3"><code>open</code><a href="#open" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Open a slot in the appropriate application based on its
+                content type — text in <code class="inline-code">$EDITOR</code>,
+                files in their default app, images in Preview, rich text in TextEdit.
+              </p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots open <span class="arg">&lt;slot&gt;</span></code></pre>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots open 3</code></pre>
+            </article>
+
+            <article class="docs-block" id="clear">
+              <h3 class="docs-h3"><code>clear</code><a href="#clear" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Clear a single slot or every slot. Locked slots are protected
+                by default — use <code class="inline-code">--force</code> to
+                wipe them too, or <code class="inline-code">--keep-locked</code>
+                to skip them non-interactively.
+              </p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots clear [<span class="arg">&lt;slot&gt;</span>] [--force] [--keep-locked]</code></pre>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots clear 3
+<span class="c">$</span> clipslots clear 3 --force
+<span class="c">$</span> clipslots clear --keep-locked</code></pre>
+              <div class="docs-table-wrapper">
+                <table class="docs-table">
+                  <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline-code">&lt;slot&gt;</code></td><td>Optional. Omit to target every slot.</td></tr>
+                    <tr><td><code class="inline-code">--force</code></td><td>Clear every slot, including locked ones. Non-interactive.</td></tr>
+                    <tr><td><code class="inline-code">--keep-locked</code></td><td>Clear only unlocked slots. Non-interactive.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+
+          <!-- ============================================================ -->
+          <!-- Organize commands                                            -->
+          <!-- ============================================================ -->
+          <section class="docs-section">
+            <h2 class="docs-h2">Organize</h2>
+
+            <article class="docs-block" id="label">
+              <h3 class="docs-h3"><code>label</code><a href="#label" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Attach a human-readable label to a slot so you can spot it in
+                <code class="inline-code">list</code> output. Labels persist
+                across writes and survive the manifest cache being rebuilt.
+              </p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots label <span class="arg">&lt;slot&gt;</span> [<span class="arg">&lt;name&gt;</span>] [--clear]</code></pre>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots label 3 "API token"
+<span class="c">$</span> clipslots label 3 --clear</code></pre>
+            </article>
+
+            <article class="docs-block" id="lock">
+              <h3 class="docs-h3"><code>lock</code><a href="#lock" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Lock a slot so <code class="inline-code">save</code>,
+                <code class="inline-code">clear</code>, and
+                <code class="inline-code">undo</code> refuse to touch it.
+                Useful for slots holding tokens or boilerplate you don't
+                want to overwrite by accident.
+              </p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots lock <span class="arg">&lt;slot&gt;</span></code></pre>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots lock 3</code></pre>
+            </article>
+
+            <article class="docs-block" id="unlock">
+              <h3 class="docs-h3"><code>unlock</code><a href="#unlock" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">Unlock a slot so it can be overwritten again.</p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots unlock <span class="arg">&lt;slot&gt;</span></code></pre>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots unlock 3</code></pre>
+            </article>
+
+            <article class="docs-block" id="swap">
+              <h3 class="docs-h3"><code>swap</code><a href="#swap" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">Exchange the contents of two slots. Labels and lock state move with the content.</p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots swap <span class="arg">&lt;a&gt;</span> <span class="arg">&lt;b&gt;</span></code></pre>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots swap 1 4</code></pre>
+            </article>
+
+            <article class="docs-block" id="copy">
+              <h3 class="docs-h3"><code>copy</code><a href="#copy" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">Duplicate the contents of one slot into another, overwriting the destination (unless it is locked).</p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots copy <span class="arg">&lt;src&gt;</span> <span class="arg">&lt;dst&gt;</span></code></pre>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots copy 1 4</code></pre>
+            </article>
+
+            <article class="docs-block" id="undo">
+              <h3 class="docs-h3"><code>undo</code><a href="#undo" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Swap a slot with its prior content. Each slot keeps one undo
+                snapshot, taken at the moment of its last write — running
+                <code class="inline-code">undo</code> twice round-trips back
+                to the current value. Locked slots are protected.
+              </p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots undo <span class="arg">&lt;slot&gt;</span></code></pre>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots undo 3</code></pre>
+            </article>
+          </section>
+
+          <!-- ============================================================ -->
+          <!-- Backup commands                                              -->
+          <!-- ============================================================ -->
+          <section class="docs-section">
+            <h2 class="docs-h2">Backup</h2>
+
+            <article class="docs-block" id="export">
+              <h3 class="docs-h3"><code>export</code><a href="#export" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">Bundle all slots, labels, and locks into a single tar archive — for backup, machine migration, or sharing a snapshot of your boilerplate.</p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots export <span class="arg">&lt;path&gt;</span></code></pre>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots export ~/clipslots-backup.tar</code></pre>
+            </article>
+
+            <article class="docs-block" id="import">
+              <h3 class="docs-h3"><code>import</code><a href="#import" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Restore slots from a tar archive previously created by
+                <code class="inline-code">export</code>. By default,
+                non-empty slots in the destination are preserved — pass
+                <code class="inline-code">--force</code> to overwrite them.
+              </p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots import <span class="arg">&lt;path&gt;</span> [--force]</code></pre>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots export ~/clipslots-backup.tar
+<span class="c">$</span> clipslots import ~/clipslots-backup.tar --force</code></pre>
+              <div class="docs-table-wrapper">
+                <table class="docs-table">
+                  <thead><tr><th>Flag</th><th>Description</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline-code">--force</code></td><td>Overwrite existing non-empty slots.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+
+          <!-- ============================================================ -->
+          <!-- Config commands                                              -->
+          <!-- ============================================================ -->
+          <section class="docs-section">
+            <h2 class="docs-h2">Config</h2>
+
+            <article class="docs-block" id="config">
+              <h3 class="docs-h3"><code>config</code><a href="#config" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">Print the current configuration: config-file path, general settings, and active keybinds. Reads the same file the daemon does.</p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots config</code></pre>
+            </article>
+
+            <article class="docs-block" id="config-edit">
+              <h3 class="docs-h3"><code>config edit</code><a href="#config-edit" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Open <code class="inline-code">~/.config/clipslots/config.toml</code> in
+                <code class="inline-code">$EDITOR</code> (or
+                <code class="inline-code">nano</code> if unset). The daemon
+                hot-reloads on save — no restart needed.
+              </p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots config edit</code></pre>
+            </article>
+
+            <article class="docs-block" id="config-validate">
+              <h3 class="docs-h3"><code>config validate</code><a href="#config-validate" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Parse and validate the config file. Exits non-zero with a
+                specific error and file path on stderr if something is wrong
+                — handy in shell scripts or pre-commit hooks for a synced
+                dotfiles repo.
+              </p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots config validate</code></pre>
+            </article>
+
+            <article class="docs-block" id="config-path">
+              <h3 class="docs-h3"><code>config path</code><a href="#config-path" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">Print the absolute path to the config file. Composes nicely with other tools.</p>
+              <pre class="docs-code"><code><span class="c">$</span> clipslots config path
+<span class="c">$</span> vim $(clipslots config path)</code></pre>
+            </article>
+          </section>
+
+          <!-- ============================================================ -->
+          <!-- Configuration reference                                      -->
+          <!-- ============================================================ -->
+          <section class="docs-section">
+            <h2 class="docs-h2">Configuration</h2>
+
+            <article class="docs-block" id="config-schema">
+              <h3 class="docs-h3">
+                config.toml schema
+                <a href="#config-schema" class="docs-anchor">#</a>
+              </h3>
+              <p class="paragraph m secondary">
+                ClipSlots reads <code class="inline-code">~/.config/clipslots/config.toml</code>.
+                Every option is optional — omit any line and ClipSlots uses
+                a sensible default. The daemon hot-reloads on save.
+              </p>
+              <pre class="docs-code"><code><span class="comment"># Number of slots (1-10)</span>
+slots = 5
+
+<span class="comment"># Show daemon logs in terminal (true/false)</span>
+verbose = true
+
+<span class="comment"># Optional: auto-expire stale slots after this many hours.</span>
+<span class="comment"># Locked slots are never expired. Omit to disable.</span>
+<span class="comment"># expire_after_hours = 24</span>
+
+<span class="comment"># Optional: play a system sound on successful hotkey actions.</span>
+<span class="comment"># Valid values: "off", "sound". CLI commands never play sound.</span>
+<span class="comment"># feedback = "sound"</span>
+
+[keybinds]
+save  = "ctrl+option+{n}"
+paste = "ctrl+{n}"
+
+<span class="comment"># Optional: append-mode hotkey. See "Append mode" below.</span>
+<span class="comment"># append           = "ctrl+option+shift+{n}"</span>
+<span class="comment"># append_separator = "\n"</span></code></pre>
+
+              <div class="docs-table-wrapper">
+                <table class="docs-table">
+                  <thead><tr><th>Key</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+                  <tbody>
+                    <tr>
+                      <td><code class="inline-code">slots</code></td>
+                      <td>int</td>
+                      <td><code class="inline-code">5</code></td>
+                      <td>How many slots to register hotkeys for. 1–10.</td>
+                    </tr>
+                    <tr>
+                      <td><code class="inline-code">verbose</code></td>
+                      <td>bool</td>
+                      <td><code class="inline-code">true</code></td>
+                      <td>Write save/paste actions and errors to <code class="inline-code">/tmp/clipslots.log</code>.</td>
+                    </tr>
+                    <tr>
+                      <td><code class="inline-code">expire_after_hours</code></td>
+                      <td>int</td>
+                      <td><em>off</em></td>
+                      <td>Auto-clear slots untouched for N hours. Locked slots are never expired.</td>
+                    </tr>
+                    <tr>
+                      <td><code class="inline-code">feedback</code></td>
+                      <td>string</td>
+                      <td><code class="inline-code">"off"</code></td>
+                      <td>Play a system sound on successful hotkey actions. <code class="inline-code">"off"</code> or <code class="inline-code">"sound"</code>.</td>
+                    </tr>
+                    <tr>
+                      <td><code class="inline-code">keybinds.save</code></td>
+                      <td>string</td>
+                      <td><code class="inline-code">"ctrl+option+{n}"</code></td>
+                      <td>Hotkey to save the clipboard into slot N.</td>
+                    </tr>
+                    <tr>
+                      <td><code class="inline-code">keybinds.paste</code></td>
+                      <td>string</td>
+                      <td><code class="inline-code">"ctrl+{n}"</code></td>
+                      <td>Hotkey to paste slot N back onto the clipboard.</td>
+                    </tr>
+                    <tr>
+                      <td><code class="inline-code">keybinds.append</code></td>
+                      <td>string</td>
+                      <td><em>off</em></td>
+                      <td>Optional hotkey to append clipboard text to a slot. See <a href="#append-mode" class="color-teal">Append mode</a>.</td>
+                    </tr>
+                    <tr>
+                      <td><code class="inline-code">keybinds.append_separator</code></td>
+                      <td>string</td>
+                      <td><code class="inline-code">"\n"</code></td>
+                      <td>Separator inserted between existing content and the appended text.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="docs-block" id="append-mode">
+              <h3 class="docs-h3">Append mode<a href="#append-mode" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Append mode is an optional third hotkey that adds clipboard
+                text to an existing slot instead of overwriting it — handy
+                for collecting snippets while you read or research. Disabled
+                by default. Uncomment the two lines under
+                <code class="inline-code">[keybinds]</code> to enable.
+              </p>
+              <pre class="docs-code"><code>[keybinds]
+save             = "ctrl+option+{n}"
+paste            = "ctrl+{n}"
+append           = "ctrl+option+shift+{n}"
+append_separator = "\n"</code></pre>
+              <p class="paragraph s secondary">
+                Appending to an empty slot acts as a normal save. Appending
+                to a locked slot, or appending non-text clipboard content,
+                is silently skipped. Rich-text slots collapse to plain text
+                on append.
+              </p>
+            </article>
+
+            <article class="docs-block" id="expiry">
+              <h3 class="docs-h3">Slot expiry<a href="#expiry" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                Set <code class="inline-code">expire_after_hours</code> to
+                automatically clear stale slots. The daemon sweeps once per
+                hour and clears any slot whose last write is older than the
+                threshold. Locked slots are never expired.
+              </p>
+              <pre class="docs-code"><code><span class="comment"># Clear slots untouched for more than 24h</span>
+expire_after_hours = 24</code></pre>
+            </article>
+
+            <article class="docs-block" id="feedback">
+              <h3 class="docs-h3">Sound feedback<a href="#feedback" class="docs-anchor">#</a></h3>
+              <p class="paragraph m secondary">
+                When <code class="inline-code">feedback = "sound"</code>, the
+                daemon plays a short system sound on successful save, paste,
+                or append from a hotkey. CLI commands
+                (<code class="inline-code">clipslots save 3</code> etc.) never
+                play sound — only hotkeys do.
+              </p>
+              <pre class="docs-code"><code>feedback = "sound"</code></pre>
+            </article>
+          </section>
+
+          <!-- ============================================================ -->
+          <!-- Reference                                                    -->
+          <!-- ============================================================ -->
+          <section class="docs-section">
+            <h2 class="docs-h2">Reference</h2>
+
+            <article class="docs-block" id="troubleshooting">
+              <h3 class="docs-h3">Troubleshooting<a href="#troubleshooting" class="docs-anchor">#</a></h3>
+
+              <details class="docs-faq">
+                <summary>Hotkeys do nothing after install</summary>
+                <p class="paragraph m secondary">
+                  Almost always missing accessibility permission. Run
+                  <code class="inline-code">clipslots permissions</code>,
+                  toggle <code class="inline-code">clipslots</code> on in
+                  System Settings, then
+                  <code class="inline-code">clipslots restart</code>.
+                </p>
+              </details>
+
+              <details class="docs-faq">
+                <summary>Accessibility permission doesn't stick after rebuild</summary>
+                <p class="paragraph m secondary">
+                  macOS ties accessibility to the binary's code signature.
+                  Unsigned (or differently-signed) builds register as a new
+                  app and lose permission. The Homebrew and <code class="inline-code">.pkg</code> distributions are signed consistently and don't have this issue.
+                </p>
+              </details>
+
+              <details class="docs-faq">
+                <summary>Daemon won't start</summary>
+                <p class="paragraph m secondary">
+                  Check <code class="inline-code">/tmp/clipslots.err</code> for the actual error. Common causes: another process bound a hotkey first (the daemon logs which one), or the config file has a syntax error (<code class="inline-code">clipslots config validate</code> will say so).
+                </p>
+              </details>
+
+              <details class="docs-faq">
+                <summary>A specific hotkey doesn't fire</summary>
+                <p class="paragraph m secondary">
+                  Some macOS shortcuts (<kbd>Ctrl</kbd>+<kbd>Space</kbd>, <kbd>Cmd</kbd>+<kbd>Tab</kbd>) and third-party tools like Raycast, Alfred, or Karabiner can claim a binding before ClipSlots gets it. Try a different combo (see the <a href="#keybinds" class="color-teal">keybind syntax</a>) or check the offending app's hotkey settings.
+                </p>
+              </details>
+
+              <details class="docs-faq">
+                <summary>Saved an image but pasting gives garbled text</summary>
+                <p class="paragraph m secondary">
+                  Some apps only accept the clipboard type they expect. ClipSlots restores the original pasteboard types faithfully — if the destination app only reads text, an image won't show. Try pasting into Preview or Finder to confirm the slot does contain an image.
+                </p>
+              </details>
+
+              <details class="docs-faq">
+                <summary>How do I uninstall?</summary>
+                <p class="paragraph m secondary">
+                  <code class="inline-code">clipslots stop</code> to unload the daemon, then <code class="inline-code">brew uninstall clipslots</code>. Slot data lives at <code class="inline-code">~/.local/share/clipslots/</code> and config at <code class="inline-code">~/.config/clipslots/</code> — delete those too for a full wipe.
+                </p>
+              </details>
+            </article>
+
+            <article class="docs-block" id="file-paths">
+              <h3 class="docs-h3">File paths<a href="#file-paths" class="docs-anchor">#</a></h3>
+              <div class="docs-table-wrapper">
+                <table class="docs-table">
+                  <thead><tr><th>Path</th><th>What</th></tr></thead>
+                  <tbody>
+                    <tr><td><code class="inline-code">~/.config/clipslots/config.toml</code></td><td>Configuration file.</td></tr>
+                    <tr><td><code class="inline-code">~/.local/share/clipslots/slots/</code></td><td>Slot contents, labels, locks.</td></tr>
+                    <tr><td><code class="inline-code">~/Library/LaunchAgents/com.clipslots.daemon.plist</code></td><td>launchd agent that boots the daemon on login.</td></tr>
+                    <tr><td><code class="inline-code">/tmp/clipslots.log</code></td><td>Daemon stdout (when <code class="inline-code">verbose = true</code>).</td></tr>
+                    <tr><td><code class="inline-code">/tmp/clipslots.err</code></td><td>Daemon stderr — check here when something breaks.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+
+          <!-- Footer CTA -->
+          <section class="docs-section docs-footer-cta">
+            <p class="paragraph m secondary">
+              Something missing or unclear?
+              <a href="https://github.com/olafglad/clipSlots/issues" target="_blank" class="color-teal">Open an issue on GitHub</a>.
+            </p>
+          </section>
+        </article>
+      </main>
+
+      <footer class="footer">
+        <div class="footer-menu">
+          <div>
+            <p class="paragraph s">
+              MIT License<br />
+              Built with
+              <a href="https://launchkit.evilmartians.io" target="_blank" class="color-teal">LaunchKit</a>
+              by
+              <a href="https://evilmartians.com" target="_blank" class="color-teal">Evil Martians</a>
+            </p>
+          </div>
+          <div>
+            <div class="link-list">
+              <a href="https://github.com/olafglad/clipSlots" class="icon-link ui s color-teal" target="_blank">
+                <div class="fa-brands fa-github icon m"></div>
+                <div class="pseudo-link">GitHub</div>
+              </a>
+              <a href="https://ko-fi.com/olafglad" class="icon-link ui s color-teal" target="_blank">
+                <div class="fa-solid fa-mug-hot icon m"></div>
+                <div class="pseudo-link">Ko-fi</div>
+              </a>
+            </div>
+          </div>
+          <div>
+            <div class="link-list">
+              <a href="../#features" class="ui s color-teal">Features</a>
+              <a href="../#install" class="ui s color-teal">Install</a>
+              <a href="./" class="ui s color-teal">Docs</a>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

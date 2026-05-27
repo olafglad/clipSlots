@@ -87,12 +87,7 @@
         <nav role="navigation" class="nav-menu" data-navigation>
           <a href="#features" class="nav-link">Features</a>
           <a href="#install" class="nav-link">Install</a>
-          <a
-            href="https://github.com/olafglad/clipSlots"
-            class="nav-link"
-            target="_blank"
-            >Docs ↗</a
-          >
+          <a href="docs/" class="nav-link">Docs</a>
           <div class="button-group stacked margin-top-l mobile-only">
             <a
               href="https://github.com/olafglad/clipSlots"
@@ -133,16 +128,13 @@
               instantly. A tiny macOS daemon, no GUI.
             </p>
             <div class="button-group margin-paragraph centered">
-              <a
-                href="https://github.com/olafglad/clipSlots/releases/download/v1.0.0/ClipSlots-1.0.0.pkg"
-                class="button primary"
-              >
+              <a href="#install" class="button primary">
                 <div class="fa-solid fa-download icon m"></div>
-                Download
+                Install
               </a>
-              <a href="#install" class="button tertiary">
-                <div class="fa-solid fa-terminal icon m"></div>
-                Build from source
+              <a href="docs/" class="button tertiary">
+                <div class="fa-solid fa-book icon m"></div>
+                Documentation
               </a>
               <a
                 href="https://github.com/olafglad/clipSlots"
@@ -206,6 +198,29 @@
               </div>
             </div>
             <div class="card-with-icon horizontal">
+              <div class="fa-solid fa-lock icon xl color-teal"></div>
+              <div class="feature-heading">
+                <p class="paragraph m bold">Lock &amp; undo</p>
+                <p class="paragraph m secondary">
+                  Lock slots holding tokens or boilerplate so they can't be
+                  overwritten. Made a mistake?
+                  <span class="inline-code">clipslots undo</span> restores
+                  the previous value.
+                </p>
+              </div>
+            </div>
+            <div class="card-with-icon horizontal">
+              <div class="fa-solid fa-tag icon xl color-teal"></div>
+              <div class="feature-heading">
+                <p class="paragraph m bold">Labels &amp; search</p>
+                <p class="paragraph m secondary">
+                  Name slots so you remember what's where.
+                  <span class="inline-code">list --grep token</span> finds them
+                  in a second.
+                </p>
+              </div>
+            </div>
+            <div class="card-with-icon horizontal">
               <div class="fa-solid fa-gear icon xl color-teal"></div>
               <div class="feature-heading">
                 <p class="paragraph m bold">Starts on login, stays hidden</p>
@@ -224,23 +239,34 @@
                   <span class="inline-code"
                     >~/.config/clipslots/config.toml</span
                   >
-                  to change hotkeys, slot count, and logging. Hot-reloads on
-                  save.
+                  to change hotkeys, slot count, expiry, and sounds.
+                  Hot-reloads on save.
                 </p>
               </div>
             </div>
             <div class="card-with-icon horizontal">
               <div class="fa-solid fa-terminal icon xl color-teal"></div>
               <div class="feature-heading">
-                <p class="paragraph m bold">Full CLI control</p>
+                <p class="paragraph m bold">20+ CLI commands</p>
                 <p class="paragraph m secondary">
-                  <span class="inline-code">clipslots status</span>,
-                  <span class="inline-code">clipslots list</span>,
-                  <span class="inline-code">clipslots config --edit</span>.
-                  Script it, alias it, pipe it.
+                  <span class="inline-code">peek</span>,
+                  <span class="inline-code">swap</span>,
+                  <span class="inline-code">export</span>,
+                  <span class="inline-code">import</span> — script it, alias
+                  it, pipe it.
                 </p>
               </div>
             </div>
+            <a class="card-with-icon reference-tile" href="docs/">
+              <div>
+                <p class="reference-tile-label">Reference</p>
+                <p class="reference-tile-title">Full command documentation</p>
+              </div>
+              <span class="reference-tile-arrow">
+                Browse the docs
+                <span class="fa-solid fa-arrow-right icon s"></span>
+              </span>
+            </a>
           </div>
         </section>
 
@@ -248,86 +274,17 @@
         <section>
           <div class="heading centered">
             <h2 class="no-top-margin">See it in action</h2>
+            <p class="paragraph m secondary">
+              All 20+ commands, the rich fastfetch-style status, labels,
+              locks, and undo — in 30 seconds.
+            </p>
           </div>
-          <div class="image-wide">
-            <div class="terminal-demo">
-              <div class="terminal-bar">
-                <span class="terminal-dot red"></span>
-                <span class="terminal-dot yellow"></span>
-                <span class="terminal-dot green"></span>
-                <span class="terminal-title">clipslots</span>
-              </div>
-              <div class="terminal-body">
-                <pre><span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots --help</span>
-<span class="terminal-output">OVERVIEW: Lightweight clipboard slot manager for macOS
-
-USAGE: clipslots &lt;subcommand&gt;
-
-OPTIONS:
-  --version       Show the version.
-  -h, --help      Show help information.
-
-SUBCOMMANDS:
-  save            Save current clipboard content to a slot
-  paste           Load slot content to clipboard
-  list            Show all slots with content preview
-  clear           Clear one or all slots
-  start           Start the ClipSlots daemon
-  stop            Stop the ClipSlots daemon
-  restart         Restart the ClipSlots daemon
-  status          Show daemon status and configuration
-  config          Show or edit configuration
-  permissions     Check and guide through permission setup</span>
-
-<span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots start</span>
-<span class="terminal-output">Starting ClipSlots daemon...
-ClipSlots daemon started successfully
-Logs: /tmp/clipslots.log</span></pre>
-                <br />
-                <div class="terminal-collapsed" data-terminal-collapsed>
-                  <pre>
-<span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots status</span>
-<span class="terminal-output">ClipSlots Status
-────────────────
-Daemon:      Running (PID: 48291)
-Accessible:  Yes
-Pasteboard:  Allowed
-Slots:       5
-Logging:     on (change in 'clipslots config --edit')
-
-Keybinds:
-  Save:      ctrl+option+{n}
-  Paste:     ctrl+{n}</span>
-
-<span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots list</span>
-<span class="terminal-output">Slot 1: Text (42 chars)
-Slot 2: Text (128 chars)
-Slot 3: Image (PNG)
-Slot 4: (empty)
-Slot 5: (empty)</span>
-
-<span class="terminal-prompt">$</span> <span class="terminal-cmd">clipslots config</span>
-<span class="terminal-output">ClipSlots Configuration
-───────────────────────
-Config file: ~/.config/clipslots/config.toml
-
-Slots:       5
-Logging:     on
-
-Keybinds:
-  Save:      ctrl+option+{n}
-  Paste:     ctrl+{n}
-
-Run 'clipslots config --edit' to open in editor.</span></pre>
-                </div>
-                <button class="terminal-toggle" data-terminal-toggle>
-                  <span class="terminal-toggle-label">Show more</span>
-                  <span
-                    class="fa-solid fa-chevron-down terminal-toggle-icon"
-                  ></span>
-                </button>
-              </div>
-            </div>
+          <div class="image-wide demo-gif-wrap">
+            <img
+              src="images/demo.gif"
+              alt="ClipSlots terminal demo — clipslots help, status, list, lock, undo"
+              class="demo-gif"
+            />
           </div>
         </section>
 
@@ -342,17 +299,61 @@ Run 'clipslots config --edit' to open in editor.</span></pre>
           </div>
           <div class="resource-proof-grid">
             <div class="resource-proof">
-              <img
-                src="images/monitor-cpu.png"
-                alt="Activity Monitor showing clipslots using 0.0% CPU"
-              />
+              <div
+                class="monitor-card"
+                role="img"
+                aria-label="Activity Monitor showing clipslots using 0.0 percent CPU"
+              >
+                <div class="monitor-header">
+                  <span class="monitor-col-name">Process Name</span>
+                  <span class="monitor-divider"></span>
+                  <span class="monitor-col-value">
+                    % CPU
+                    <span class="fa-solid fa-chevron-down monitor-chevron" aria-hidden="true"></span>
+                  </span>
+                </div>
+                <div class="monitor-row">
+                  <span class="monitor-process">
+                    <img
+                      src="images/clipboard-favicon.png"
+                      alt=""
+                      class="monitor-app-icon"
+                      aria-hidden="true"
+                    />
+                    clipslots
+                  </span>
+                  <span class="monitor-value">0.0</span>
+                </div>
+              </div>
               <p class="resource-caption paragraph s tertiary">0% CPU</p>
             </div>
             <div class="resource-proof">
-              <img
-                src="images/monitor-ram.png"
-                alt="Activity Monitor showing clipslots using 10.3 MB RAM"
-              />
+              <div
+                class="monitor-card"
+                role="img"
+                aria-label="Activity Monitor showing clipslots using 10.7 MB of memory"
+              >
+                <div class="monitor-header">
+                  <span class="monitor-col-name">Process Name</span>
+                  <span class="monitor-divider"></span>
+                  <span class="monitor-col-value">
+                    Memory
+                    <span class="fa-solid fa-chevron-down monitor-chevron" aria-hidden="true"></span>
+                  </span>
+                </div>
+                <div class="monitor-row">
+                  <span class="monitor-process">
+                    <img
+                      src="images/clipboard-favicon.png"
+                      alt=""
+                      class="monitor-app-icon"
+                      aria-hidden="true"
+                    />
+                    clipslots
+                  </span>
+                  <span class="monitor-value">10.7<span class="monitor-unit">&nbsp;MB</span></span>
+                </div>
+              </div>
               <p class="resource-caption paragraph s tertiary">~10 MB RAM</p>
             </div>
           </div>
@@ -365,11 +366,20 @@ Run 'clipslots config --edit' to open in editor.</span></pre>
             <p class="paragraph m secondary">
               Install with Homebrew, download the
               <a
-                href="https://github.com/olafglad/clipSlots/releases/latest"
-                target="_blank"
+                href="https://github.com/olafglad/clipSlots/releases/latest/download/ClipSlots.pkg"
                 class="color-teal"
                 >.pkg installer</a
               >, or build from source.
+            </p>
+            <p class="paragraph s tertiary">
+              Recently shipped: undo, slot locking, labels, swap/copy,
+              export/import.
+              <a
+                href="https://github.com/olafglad/clipSlots/releases"
+                target="_blank"
+                class="color-teal"
+                >See the changelog →</a
+              >
             </p>
           </div>
           <div class="grid columns-1/2-1 gap-xl">
@@ -512,6 +522,7 @@ clipslots start"
             <div class="link-list">
               <a href="#features" class="ui s color-teal">Features</a>
               <a href="#install" class="ui s color-teal">Install</a>
+              <a href="docs/" class="ui s color-teal">Docs</a>
             </div>
           </div>
         </div>
