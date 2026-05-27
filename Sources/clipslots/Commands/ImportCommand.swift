@@ -4,7 +4,12 @@ import Foundation
 struct ImportCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "import",
-        abstract: "Import slots from a tar archive"
+        abstract: "Import slots from a tar archive",
+        discussion: """
+            Example (back up first; --force replaces existing non-empty slots):
+              clipslots export ~/clipslots-backup.tar
+              clipslots import ~/clipslots-backup.tar --force
+            """
     )
 
     @Argument(help: "Source archive path")

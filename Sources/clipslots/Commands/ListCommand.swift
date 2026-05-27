@@ -3,7 +3,13 @@ import Foundation
 
 struct List: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Show all slots with content preview"
+        abstract: "Show all slots with content preview",
+        discussion: """
+            Examples:
+              clipslots list                # one row per slot, with age suffix
+              clipslots list --verbose      # show size, types, lock state
+              clipslots list --grep token   # filter by label or preview
+            """
     )
 
     @Option(name: .long, help: "Filter slots whose label or preview contains the pattern (case-insensitive).")
@@ -26,7 +32,7 @@ struct List: ParsableCommand {
             }
         }
 
-        let useColor = isatty(fileno(stdout)) != 0
+        let useColor = Style.useColor()
         let now = Date()
 
         if verbose {
@@ -124,7 +130,7 @@ struct List: ParsableCommand {
         let labelText = row.label ?? ""
         let paddedLabel = labelText.padding(toLength: labelWidth, withPad: " ", startingAt: 0)
         let coloredLabel = (useColor && !labelText.isEmpty)
-            ? "\u{001B}[36m\(paddedLabel)\u{001B}[0m"
+            ? Style.color(.cyan, paddedLabel)
             : paddedLabel
 
         return "\(slotColumn)  \(coloredLabel)  \(description)\(ageSuffix)"
@@ -145,7 +151,7 @@ struct List: ParsableCommand {
         let lockGlyph = useColor ? "🔒" : "[L]"
         var header = "Slot \(row.slot)"
         if let label = row.label, !label.isEmpty {
-            let coloredLabel = useColor ? "\u{001B}[36m\(label)\u{001B}[0m" : label
+            let coloredLabel = useColor ? Style.color(.cyan, label) : label
             header += "  \(coloredLabel)"
         }
         if row.locked {

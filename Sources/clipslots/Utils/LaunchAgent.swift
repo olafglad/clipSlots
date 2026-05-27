@@ -86,6 +86,45 @@ class LaunchAgentManager {
         return (true, nil)
     }
 
+    /// Returns the wall-clock uptime for a PID by parsing `ps -o lstart=`,
+    /// or `nil` on any failure. Callers should omit uptime rather than
+    /// display "unknown".
+    static func uptimeForPID(_ pid: Int) -> TimeInterval? {
+        let process = Process()
+        let pipe = Pipe()
+        process.executableURL = URL(fileURLWithPath: "/bin/ps")
+        process.arguments = ["-o", "lstart=", "-p", String(pid)]
+        process.standardOutput = pipe
+        process.standardError = FileHandle.nullDevice
+
+        var env = ProcessInfo.processInfo.environment
+        env["LC_ALL"] = "C"
+        process.environment = env
+
+        do {
+            try process.run()
+            process.waitUntilExit()
+        } catch {
+            return nil
+        }
+
+        guard process.terminationStatus == 0 else { return nil }
+
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let raw = (String(data: data, encoding: .utf8) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !raw.isEmpty else { return nil }
+
+        // `ps -o lstart=` collapses multiple spaces; collapse for our parser too.
+        let collapsed = raw.split(whereSeparator: { $0 == " " }).joined(separator: " ")
+
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "EEE MMM d HH:mm:ss yyyy"
+        guard let started = formatter.date(from: collapsed) else { return nil }
+        return Date().timeIntervalSince(started)
+    }
+
     private static func generatePlist(binaryPath: String) -> String {
         """
         <?xml version="1.0" encoding="UTF-8"?>

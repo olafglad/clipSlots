@@ -3,7 +3,12 @@ import Foundation
 
 struct Undo: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Restore a slot to its previous content"
+        abstract: "Restore a slot to its previous content",
+        discussion: """
+            Example:
+              clipslots undo 3   # swap slot 3 with its prior content;
+                                 # running `undo 3` again round-trips back
+            """
     )
 
     @Argument(help: "Slot number to undo")

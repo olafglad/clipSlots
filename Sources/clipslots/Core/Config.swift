@@ -8,6 +8,19 @@ struct Config: Codable {
     var feedback: String = "off"
     var keybinds: Keybinds = Keybinds()
 
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        // NOTE: every new stored property MUST be added here, not just declared above,
+        // or it will silently always read as its default. See Keybinds for the pattern.
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        slots              = try c.decodeIfPresent(Int.self,      forKey: .slots)              ?? 5
+        verbose            = try c.decodeIfPresent(Bool.self,     forKey: .verbose)            ?? true
+        expire_after_hours = try c.decodeIfPresent(Int.self,      forKey: .expire_after_hours)
+        feedback           = try c.decodeIfPresent(String.self,   forKey: .feedback)           ?? "off"
+        keybinds           = try c.decodeIfPresent(Keybinds.self, forKey: .keybinds)           ?? Keybinds()
+    }
+
     struct Keybinds: Codable {
         var save: String = "ctrl+option+{n}"
         var paste: String = "ctrl+{n}"
@@ -172,5 +185,24 @@ paste = "ctrl+{n}"
             print("Warning: Could not parse config: \(error.localizedDescription). Using defaults.")
             return Config.default
         }
+    }
+
+    /// Like `load()` but does not swallow parse/validation errors. Used by
+    /// `config validate` so real problems surface with a non-zero exit.
+    /// If the file doesn't exist, it's created with defaults (same as `load()`).
+    static func loadStrict() throws -> Config {
+        let configURL = Paths.configFile
+
+        try Paths.ensureDirectoryExists(at: Paths.configDirectory)
+
+        if !FileManager.default.fileExists(atPath: configURL.path) {
+            try defaultConfigContent.write(to: configURL, atomically: true, encoding: .utf8)
+            return Config.default
+        }
+
+        let tomlData = try Data(contentsOf: configURL)
+        let config = try TOMLDecoder().decode(Config.self, from: tomlData)
+        try config.validate()
+        return config
     }
 }

@@ -3,7 +3,13 @@ import Foundation
 
 struct Peek: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Print the text content of a slot to stdout"
+        abstract: "Print the text content of a slot to stdout",
+        discussion: """
+            Examples:
+              clipslots peek 3
+              TOKEN=$(clipslots peek 7)
+              diff <(clipslots peek 1) <(clipslots peek 2)
+            """
     )
 
     @Argument(help: "Slot number to peek")

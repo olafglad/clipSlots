@@ -3,7 +3,13 @@ import Foundation
 
 struct Clear: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Clear one or all slots"
+        abstract: "Clear one or all slots",
+        discussion: """
+            Examples:
+              clipslots clear 3              # clear slot 3 (refuses if locked)
+              clipslots clear 3 --force      # clear slot 3 even if locked
+              clipslots clear --keep-locked  # clear unlocked slots only
+            """
     )
 
     @Argument(help: "Slot number to clear (omit to clear all)")

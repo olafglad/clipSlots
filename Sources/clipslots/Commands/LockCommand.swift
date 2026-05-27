@@ -3,7 +3,11 @@ import Foundation
 
 struct Lock: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Lock a slot so it cannot be overwritten or cleared"
+        abstract: "Lock a slot so it cannot be overwritten or cleared",
+        discussion: """
+            Example:
+              clipslots lock 3   # save/clear/undo refuse until 'unlock 3'
+            """
     )
 
     @Argument(help: "Slot number to lock")

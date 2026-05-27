@@ -3,7 +3,11 @@ import Foundation
 
 struct Paste: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Load slot content to clipboard"
+        abstract: "Load slot content to clipboard",
+        discussion: """
+            Example:
+              clipslots paste 3   # put slot 3's content back on the clipboard
+            """
     )
 
     @Argument(help: "Slot number to paste from")

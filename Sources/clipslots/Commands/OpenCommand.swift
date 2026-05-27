@@ -4,7 +4,12 @@ import AppKit
 
 struct Open: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Open a slot in the appropriate application"
+        abstract: "Open a slot in the appropriate application",
+        discussion: """
+            Example:
+              clipslots open 3   # text → $EDITOR, file → default app,
+                                 # image → Preview, rich text → TextEdit/browser
+            """
     )
 
     @Argument(help: "Slot number to open")

@@ -3,7 +3,11 @@ import Foundation
 
 struct Unlock: ParsableCommand {
     static let configuration = CommandConfiguration(
-        abstract: "Unlock a slot so it can be overwritten again"
+        abstract: "Unlock a slot so it can be overwritten again",
+        discussion: """
+            Example:
+              clipslots unlock 3
+            """
     )
 
     @Argument(help: "Slot number to unlock")
