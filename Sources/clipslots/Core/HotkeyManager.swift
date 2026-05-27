@@ -103,6 +103,7 @@ class HotkeyManager {
         do {
             try storage.setSlot(slot, content: content)
             log("[\(timestamp())] Saved to slot \(slot): \(content.contentDescription)")
+            Feedback.playSuccess(config: config)
 
             // Restore original clipboard only if we changed it with Cmd+C
             if newChangeCount != originalChangeCount, let original = originalContent {
@@ -178,6 +179,7 @@ class HotkeyManager {
         do {
             try storage.setSlot(slot, content: mergedContent)
             log("[\(timestamp())] Appended to slot \(slot): \(mergedContent.contentDescription)")
+            Feedback.playSuccess(config: config)
 
             if newChangeCount != originalChangeCount, let original = originalContent {
                 _ = clipboard.restoreAll(original)
@@ -209,6 +211,7 @@ class HotkeyManager {
         }
 
         log("[\(timestamp())] Pasted slot \(slot): \(content.contentDescription)")
+        Feedback.playSuccess(config: config)
     }
 
     private func simulateKeyPress(key: CGKeyCode, flags: CGEventFlags) {

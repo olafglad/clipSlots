@@ -5,6 +5,7 @@ struct Config: Codable {
     var slots: Int = 5
     var verbose: Bool = true
     var expire_after_hours: Int? = nil
+    var feedback: String = "off"
     var keybinds: Keybinds = Keybinds()
 
     struct Keybinds: Codable {
@@ -32,6 +33,9 @@ struct Config: Codable {
         }
         if let hours = expire_after_hours, hours <= 0 {
             throw ConfigError.invalidExpireHours(hours)
+        }
+        guard ["off", "sound"].contains(feedback) else {
+            throw ConfigError.invalidFeedback(feedback)
         }
         try validateKeybindPattern(keybinds.save, type: "save")
         try validateKeybindPattern(keybinds.paste, type: "paste")
@@ -68,6 +72,7 @@ enum ConfigError: LocalizedError {
     case invalidFormat(String)
     case invalidSlotCount(Int)
     case invalidExpireHours(Int)
+    case invalidFeedback(String)
     case missingPlaceholder(type: String, pattern: String)
     case invalidKeybindFormat(type: String, pattern: String)
     case invalidModifier(modifier: String, type: String)
@@ -82,6 +87,8 @@ enum ConfigError: LocalizedError {
             return "Invalid slot count: \(count). Must be between 1 and 10."
         case .invalidExpireHours(let hours):
             return "Invalid expire_after_hours: \(hours). Must be a positive integer (or omit the key to disable)."
+        case .invalidFeedback(let value):
+            return "Invalid feedback: \"\(value)\". Must be \"off\" or \"sound\"."
         case .missingPlaceholder(let type, let pattern):
             return "Invalid keybind for \(type): \"\(pattern)\" missing {n} placeholder."
         case .invalidKeybindFormat(let type, let pattern):
@@ -109,6 +116,13 @@ verbose = true
 # Leave the line commented out (or remove it) to disable expiry.
 #
 # expire_after_hours = 24
+
+# Optional: play a short system sound on successful save/paste/append from
+# a hotkey. Useful confirmation that the hotkey fired. Off by default.
+# Valid values: "off", "sound". Sound feedback never fires from the CLI
+# (`clipslots save` / `paste`), only from daemon hotkeys.
+#
+# feedback = "sound"
 
 # Keybind configuration
 # Use {n} as placeholder for the slot number
