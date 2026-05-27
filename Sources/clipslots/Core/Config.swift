@@ -4,6 +4,7 @@ import TOMLDecoder
 struct Config: Codable {
     var slots: Int = 5
     var verbose: Bool = true
+    var expire_after_hours: Int? = nil
     var keybinds: Keybinds = Keybinds()
 
     struct Keybinds: Codable {
@@ -28,6 +29,9 @@ struct Config: Codable {
     func validate() throws {
         guard (1...10).contains(slots) else {
             throw ConfigError.invalidSlotCount(slots)
+        }
+        if let hours = expire_after_hours, hours <= 0 {
+            throw ConfigError.invalidExpireHours(hours)
         }
         try validateKeybindPattern(keybinds.save, type: "save")
         try validateKeybindPattern(keybinds.paste, type: "paste")
@@ -63,6 +67,7 @@ enum ConfigError: LocalizedError {
     case fileNotFound
     case invalidFormat(String)
     case invalidSlotCount(Int)
+    case invalidExpireHours(Int)
     case missingPlaceholder(type: String, pattern: String)
     case invalidKeybindFormat(type: String, pattern: String)
     case invalidModifier(modifier: String, type: String)
@@ -75,6 +80,8 @@ enum ConfigError: LocalizedError {
             return "Config error in ~/.config/clipslots/config.toml: \(error). Using defaults."
         case .invalidSlotCount(let count):
             return "Invalid slot count: \(count). Must be between 1 and 10."
+        case .invalidExpireHours(let hours):
+            return "Invalid expire_after_hours: \(hours). Must be a positive integer (or omit the key to disable)."
         case .missingPlaceholder(let type, let pattern):
             return "Invalid keybind for \(type): \"\(pattern)\" missing {n} placeholder."
         case .invalidKeybindFormat(let type, let pattern):
@@ -95,6 +102,13 @@ slots = 5
 # Show daemon logs in terminal (true/false)
 # Logs save/paste actions, startup info, errors, etc.
 verbose = true
+
+# Optional: auto-expire stale slots after this many hours. The daemon
+# sweeps once per hour and clears any slot whose last-write time is
+# older than the threshold. Locked slots are never expired.
+# Leave the line commented out (or remove it) to disable expiry.
+#
+# expire_after_hours = 24
 
 # Keybind configuration
 # Use {n} as placeholder for the slot number

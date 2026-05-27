@@ -40,6 +40,13 @@ struct Daemon: ParsableCommand {
 
         hotkeyManager.registerHotkeys()
 
+        // Expiry sweep: a hourly DispatchSourceTimer that clears stale
+        // (non-locked) slots when `expire_after_hours` is configured.
+        // Held in a box so the config-reload closure can swap storage
+        // references without losing the timer handle.
+        let expirySweeper = ExpirySweeper(storage: storage, hoursThreshold: config.expire_after_hours, log: log)
+        expirySweeper.start()
+
         // Watch config file for changes
         let configWatcher = ConfigFileWatcher(configURL: Paths.configFile) {
             do {
@@ -49,6 +56,7 @@ struct Daemon: ParsableCommand {
                 config = newConfig
                 storage = newStorage
                 hotkeyManager.reload(config: newConfig, storage: newStorage)
+                expirySweeper.reload(storage: newStorage, hoursThreshold: newConfig.expire_after_hours)
             } catch {
                 print("[\(DateFormatter.shortTime.string(from: Date()))] Config reload failed: \(error.localizedDescription)")
             }
@@ -60,6 +68,7 @@ struct Daemon: ParsableCommand {
         sigintSource.setEventHandler {
             print("\nReceived SIGINT, shutting down...")
             configWatcher.stop()
+            expirySweeper.stop()
             hotkeyManager.unregisterAll()
             Darwin.exit(0)
         }
@@ -70,6 +79,7 @@ struct Daemon: ParsableCommand {
         sigtermSource.setEventHandler {
             print("\nReceived SIGTERM, shutting down...")
             configWatcher.stop()
+            expirySweeper.stop()
             hotkeyManager.unregisterAll()
             Darwin.exit(0)
         }
@@ -89,6 +99,109 @@ private extension DateFormatter {
         f.dateFormat = "HH:mm:ss"
         return f
     }()
+}
+
+/// Hourly sweep that clears non-locked slots whose mtime exceeds the
+/// configured threshold. `hoursThreshold == nil` keeps the sweep idle.
+class ExpirySweeper {
+    private var storage: SlotStorage
+    private var hoursThreshold: Int?
+    private let log: (String) -> Void
+    private var timer: DispatchSourceTimer?
+    private let interval: DispatchTimeInterval = .seconds(60 * 60)
+
+    init(storage: SlotStorage, hoursThreshold: Int?, log: @escaping (String) -> Void) {
+        self.storage = storage
+        self.hoursThreshold = hoursThreshold
+        self.log = log
+    }
+
+    func start() {
+        rebuild()
+    }
+
+    func reload(storage: SlotStorage, hoursThreshold: Int?) {
+        self.storage = storage
+        self.hoursThreshold = hoursThreshold
+        rebuild()
+    }
+
+    func stop() {
+        timer?.cancel()
+        timer = nil
+    }
+
+    private func rebuild() {
+        timer?.cancel()
+        timer = nil
+        guard let hours = hoursThreshold, hours > 0 else {
+            // Disabling resets the grace-period marker so the next enable
+            // earns a fresh full grace period instead of reusing a stale
+            // timestamp from a previous on-period.
+            try? storage.clearExpiryEnabled()
+            log("Expiry sweep disabled (expire_after_hours not set).")
+            return
+        }
+
+        // First time we observe the feature enabled, stamp the moment so
+        // the grace-period floor lives across daemon restarts. Idempotent
+        // on subsequent rebuilds (e.g. user edits the hours value).
+        let enabledAt: Date
+        do {
+            enabledAt = try storage.markExpiryEnabled()
+        } catch {
+            print("[\(DateFormatter.shortTime.string(from: Date()))] Could not persist expiry-enabled timestamp: \(error.localizedDescription)")
+            enabledAt = Date()
+        }
+
+        log("Expiry sweep enabled: clearing non-locked slots older than \(hours)h, checking hourly.")
+        let earliest = enabledAt.addingTimeInterval(TimeInterval(hours) * 3600)
+        if earliest > Date() {
+            let stampFormatter = ISO8601DateFormatter()
+            log("  Grace period: existing slots will not be cleared before \(stampFormatter.string(from: earliest)).")
+        }
+
+        // Run once at startup so a daemon that just woke up doesn't wait
+        // a full hour to clean up stale slots from earlier sessions. The
+        // grace-period floor prevents this from being destructive on the
+        // first enable.
+        sweep()
+
+        let t = DispatchSource.makeTimerSource(queue: .main)
+        t.schedule(deadline: .now() + interval, repeating: interval)
+        t.setEventHandler { [weak self] in self?.sweep() }
+        t.resume()
+        timer = t
+    }
+
+    private func sweep() {
+        guard let hours = hoursThreshold, hours > 0 else { return }
+        let thresholdSeconds = TimeInterval(hours) * 3600
+        do {
+            let cleared = try storage.clearExpired(
+                olderThanSeconds: thresholdSeconds,
+                enabledFloor: storage.expiryEnabledAt()
+            )
+            let now = Date()
+            for entry in cleared {
+                let age = relativeAge(from: entry.mtime, to: now)
+                log("[\(DateFormatter.shortTime.string(from: now))] Expired slot \(entry.slot) (age \(age))")
+            }
+        } catch {
+            print("[\(DateFormatter.shortTime.string(from: Date()))] Expiry sweep failed: \(error.localizedDescription)")
+        }
+    }
+
+    private func relativeAge(from date: Date, to now: Date) -> String {
+        let seconds = Int(now.timeIntervalSince(date))
+        if seconds < 60 { return "\(seconds)s" }
+        let minutes = seconds / 60
+        if minutes < 60 { return "\(minutes)m" }
+        let hours = minutes / 60
+        if hours < 24 { return "\(hours)h\(minutes % 60)m" }
+        let days = hours / 24
+        return "\(days)d\(hours % 24)h"
+    }
 }
 
 class ConfigFileWatcher {

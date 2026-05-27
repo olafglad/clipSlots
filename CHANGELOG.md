@@ -15,6 +15,31 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.9.0] - 2026-05-27
+
+### Added
+- Optional slot expiry: a new top-level `expire_after_hours` config key
+  enables the daemon to auto-clear non-locked slots whose last-write
+  mtime exceeds the threshold. Disabled by default — uncomment the
+  example line in `~/.config/clipslots/config.toml` to opt in. The
+  daemon sweeps once at startup and then once per hour while enabled.
+  Locked slots are exempt; per-slot mtimes are the age basis (matches
+  `list --verbose` age semantics).
+- Inline age in default `clipslots list`: every non-empty slot row now
+  ends with `(Xm ago)` so freshness is visible without `--verbose`.
+
+### Behavior
+- **Grace period on first enable:** when the feature transitions from
+  disabled to enabled, the moment is persisted in
+  `slots/expiry_state.json`. The age basis for each slot is
+  `max(slot_mtime, enabledAt)`, so already-stale slots get a fresh
+  full TTL window before they can be cleared. Disabling the feature
+  removes the marker, so a later re-enable earns a fresh grace period.
+- Each cleared slot is logged on its own line (`Expired slot N (age …)`)
+  when daemon `verbose = true`. The grace-period boundary is also
+  logged once on enable (`existing slots will not be cleared before
+  <ISO timestamp>`).
+
 ## [1.8.1] - 2026-05-26
 
 ### Fixed
@@ -164,6 +189,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.9.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.9.0
 [1.8.1]: https://github.com/olafglad/clipSlots/releases/tag/v1.8.1
 [1.8.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.8.0
 [1.7.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.7.0

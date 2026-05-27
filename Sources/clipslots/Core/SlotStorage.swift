@@ -99,6 +99,42 @@ class SlotStorage {
         try data.write(to: Paths.locksFile, options: .atomic)
     }
 
+    // MARK: - Expiry state
+
+    /// The timestamp at which the expiry feature was first enabled in the
+    /// current session of being enabled. Nil when the feature is disabled
+    /// (file absent). The age basis for `clearExpired` uses
+    /// `max(slot_mtime, enabledAt)` so pre-existing stale slots get a
+    /// fresh grace period equal to the TTL itself on first enable.
+    func expiryEnabledAt() -> Date? {
+        guard let data = try? Data(contentsOf: Paths.expiryStateFile),
+              let dict = try? JSONDecoder().decode([String: String].self, from: data),
+              let iso = dict["enabledAt"],
+              let date = ISO8601DateFormatter().date(from: iso)
+        else { return nil }
+        return date
+    }
+
+    /// Marks the expiry feature as enabled starting at `at` (defaulting to
+    /// now). Idempotent: if already marked, the timestamp is preserved.
+    /// Returns the persisted timestamp.
+    @discardableResult
+    func markExpiryEnabled(at: Date = Date()) throws -> Date {
+        if let existing = expiryEnabledAt() { return existing }
+        let iso = ISO8601DateFormatter().string(from: at)
+        let data = try JSONEncoder().encode(["enabledAt": iso])
+        try data.write(to: Paths.expiryStateFile, options: .atomic)
+        return at
+    }
+
+    /// Clears the persisted expiry-enabled marker. Called when the user
+    /// disables the feature so the next enable earns a fresh grace period.
+    func clearExpiryEnabled() throws {
+        if fm.fileExists(atPath: Paths.expiryStateFile.path) {
+            try fm.removeItem(at: Paths.expiryStateFile)
+        }
+    }
+
     // MARK: - Public API
 
     func getSlot(_ slotNumber: Int) -> SlotContent? {
@@ -221,6 +257,52 @@ class SlotStorage {
     /// Forces a rebuild of the manifest cache from on-disk slot state.
     func refreshManifest() throws {
         try updateManifest()
+    }
+
+    /// Clears every non-locked slot whose effective age exceeds
+    /// `olderThanSeconds`. The age basis for each slot is
+    /// `now - max(slot_mtime, enabledFloor)`, so pre-existing stale slots
+    /// get a grace period equal to the TTL itself before the first sweep
+    /// can touch them. `enabledFloor` should be the timestamp at which
+    /// the expiry feature was first enabled in the current session
+    /// (see `expiryEnabledAt`). When `enabledFloor` is nil the floor is
+    /// ignored. Returns each cleared slot with its true mtime — the
+    /// caller is expected to log it. A single manifest rebuild covers
+    /// the whole sweep.
+    func clearExpired(olderThanSeconds: TimeInterval, enabledFloor: Date?, now: Date = Date()) throws -> [(slot: Int, mtime: Date)] {
+        let locks = loadLocks()
+        var labels = loadLabels()
+        var cleared: [(slot: Int, mtime: Date)] = []
+
+        for i in 1...slotCount {
+            if locks.contains(i) { continue }
+            let slotDir = Paths.slotDirectory(i)
+            guard fm.fileExists(atPath: slotDir.path),
+                  let mtime = try? fm.attributesOfItem(atPath: slotDir.path)[.modificationDate] as? Date
+            else { continue }
+
+            // Grace-period floor: a slot's effective "age starts here"
+            // is the later of its own mtime and the moment the feature
+            // was enabled. Without this, enabling expiry would wipe any
+            // already-stale slot the user might have wanted to keep.
+            let ageBasis: Date
+            if let floor = enabledFloor, floor > mtime {
+                ageBasis = floor
+            } else {
+                ageBasis = mtime
+            }
+
+            if now.timeIntervalSince(ageBasis) >= olderThanSeconds {
+                try fm.removeItem(at: slotDir)
+                labels.removeValue(forKey: String(i))
+                cleared.append((slot: i, mtime: mtime))
+            }
+        }
+
+        guard !cleared.isEmpty else { return [] }
+        try writeLabels(labels)
+        try updateManifest()
+        return cleared
     }
 
     func getManifest() -> Manifest? {
