@@ -5,7 +5,7 @@ struct ClipSlots: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "clipslots",
         abstract: "Lightweight clipboard slot manager for macOS",
-        version: "1.11.0",
+        version: "1.12.0",
         subcommands: [
             Save.self,
             Paste.self,
@@ -17,6 +17,8 @@ struct ClipSlots: ParsableCommand {
             Lock.self,
             Unlock.self,
             Undo.self,
+            Swap.self,
+            Copy.self,
             Export.self,
             ImportCommand.self,
             Start.self,

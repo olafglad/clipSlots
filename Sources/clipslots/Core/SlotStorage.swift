@@ -3,6 +3,8 @@ import Foundation
 enum SlotStorageError: Error, LocalizedError {
     case slotLocked(Int)
     case noUndoAvailable(Int)
+    case slotEmpty(Int)
+    case sameSlot
 
     var errorDescription: String? {
         switch self {
@@ -10,6 +12,10 @@ enum SlotStorageError: Error, LocalizedError {
             return "Slot \(n) is locked. Run `clipslots unlock \(n)` first."
         case .noUndoAvailable(let n):
             return "No previous content for slot \(n)."
+        case .slotEmpty(let n):
+            return "Slot \(n) is empty."
+        case .sameSlot:
+            return "Source and destination must differ."
         }
     }
 }
@@ -261,6 +267,78 @@ class SlotStorage {
             try fm.moveItem(at: stash, to: prevDir)
         }
         try updateManifest()
+    }
+
+    // MARK: - Swap / Copy
+
+    /// Swaps the contents of two slots. Both slots must be non-empty and
+    /// unlocked. Each side records an undo point so the operation is
+    /// reversible per-slot. Throws `sameSlot` when `a == b`,
+    /// `slotEmpty` if either side has no content, and `slotLocked` if
+    /// either side is locked.
+    func swap(_ a: Int, _ b: Int) throws {
+        guard a != b else { throw SlotStorageError.sameSlot }
+        if isLocked(a) { throw SlotStorageError.slotLocked(a) }
+        if isLocked(b) { throw SlotStorageError.slotLocked(b) }
+        if isSlotEmpty(a) { throw SlotStorageError.slotEmpty(a) }
+        if isSlotEmpty(b) { throw SlotStorageError.slotEmpty(b) }
+
+        // Snapshot both sides into prev so each slot can be `undo`'d
+        // independently back to its pre-swap content.
+        try snapshotCurrentAsPrev(slotNumber: a)
+        try snapshotCurrentAsPrev(slotNumber: b)
+
+        let dirA = Paths.slotDirectory(a)
+        let dirB = Paths.slotDirectory(b)
+        let pid = ProcessInfo.processInfo.processIdentifier
+        let stash = Paths.slotsDirectory.appendingPathComponent(".swap_\(a)_\(b)_\(pid)")
+        if fm.fileExists(atPath: stash.path) {
+            try fm.removeItem(at: stash)
+        }
+
+        // A → stash, B → A, stash → B. Same-volume directory renames
+        // are atomic; the worst-case interruption leaves the stash on
+        // disk to be cleaned up by `cleanupTempDirectories` on next
+        // start (it does not match `.tmp_` prefix, so add the same
+        // cleanup behavior for `.swap_` to be safe — see below).
+        try fm.moveItem(at: dirA, to: stash)
+        do {
+            try fm.moveItem(at: dirB, to: dirA)
+        } catch {
+            try? fm.moveItem(at: stash, to: dirA)
+            throw error
+        }
+        do {
+            try fm.moveItem(at: stash, to: dirB)
+        } catch {
+            // dirA now holds what was B; dirB is empty. Try to roll
+            // dirA's contents back to dirB and the stash back to dirA
+            // so we leave a consistent state.
+            try? fm.moveItem(at: dirA, to: dirB)
+            try? fm.moveItem(at: stash, to: dirA)
+            throw error
+        }
+
+        try updateManifest()
+    }
+
+    /// Copies the content of `src` into `dst`, overwriting whatever was
+    /// in `dst`. Destination gets a fresh undo point so the previous
+    /// content can be restored with `undo`. Source is read-only.
+    /// Throws `sameSlot`, `slotEmpty(src)` when src is empty, and
+    /// `slotLocked(dst)` when dst is locked. Source locks do not
+    /// block a copy (read-only on the source side).
+    func copy(from src: Int, to dst: Int) throws {
+        guard src != dst else { throw SlotStorageError.sameSlot }
+        if isLocked(dst) { throw SlotStorageError.slotLocked(dst) }
+        if isSlotEmpty(src) { throw SlotStorageError.slotEmpty(src) }
+        guard let content = getSlot(src) else {
+            throw SlotStorageError.slotEmpty(src)
+        }
+        // setSlot handles snapshotCurrentAsPrev for dst and updates
+        // the manifest. It also re-checks the lock on dst, which is
+        // fine — we already checked above.
+        try setSlot(dst, content: content)
     }
 
     /// Captures the current on-disk slot dir as the prev snapshot.
@@ -516,7 +594,7 @@ class SlotStorage {
         guard let contents = try? fm.contentsOfDirectory(at: Paths.slotsDirectory, includingPropertiesForKeys: nil) else {
             return
         }
-        for item in contents where item.lastPathComponent.hasPrefix(".tmp_") {
+        for item in contents where item.lastPathComponent.hasPrefix(".tmp_") || item.lastPathComponent.hasPrefix(".swap_") {
             try? fm.removeItem(at: item)
         }
     }

@@ -15,6 +15,27 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.12.0] - 2026-05-27
+
+### Added
+- `clipslots swap <a> <b>` exchanges the contents of two slots, and
+  `clipslots copy <src> <dst>` duplicates one slot's content into
+  another. Useful when you realise after saving "this should've been
+  slot 1" and the source app has already moved on.
+
+### Behavior
+- Both commands respect locks (#6). `swap` refuses if either slot is
+  locked; `copy` refuses if the destination is locked. The source of a
+  copy is read-only, so source locks don't block.
+- Both commands refuse with a non-zero exit when the source is empty
+  (and for `swap`, when either side is empty). Same-slot operations
+  (`swap 3 3`, `copy 3 3`) are validation errors.
+- Both commands create undo (#12) snapshots before mutating: `swap`
+  writes one prev per side so each slot can be undone independently;
+  `copy` writes one prev for the destination. Underlying storage uses
+  the same atomic rename pattern as `setSlot` (`.swap_*` stash dirs are
+  cleaned up on daemon start if a crash ever leaves one behind).
+
 ## [1.11.0] - 2026-05-27
 
 ### Added
@@ -229,6 +250,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.12.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.12.0
 [1.11.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.11.0
 [1.10.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.10.0
 [1.9.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.9.0
