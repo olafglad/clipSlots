@@ -27,9 +27,9 @@ struct List: ParsableCommand {
         }
 
         let useColor = isatty(fileno(stdout)) != 0
+        let now = Date()
 
         if verbose {
-            let now = Date()
             for (index, row) in rows.enumerated() {
                 if index > 0 { print("") }
                 printVerbose(row: row, useColor: useColor, now: now)
@@ -42,7 +42,7 @@ struct List: ParsableCommand {
         let anyLocked = rows.contains { $0.locked }
 
         for row in rows {
-            print(format(row: row, labelWidth: maxLabelWidth, showLabelColumn: showLabelColumn, useColor: useColor, reserveLockColumn: anyLocked))
+            print(format(row: row, labelWidth: maxLabelWidth, showLabelColumn: showLabelColumn, useColor: useColor, reserveLockColumn: anyLocked, now: now))
         }
     }
 
@@ -103,7 +103,7 @@ struct List: ParsableCommand {
         return rows
     }
 
-    private func format(row: Row, labelWidth: Int, showLabelColumn: Bool, useColor: Bool, reserveLockColumn: Bool) -> String {
+    private func format(row: Row, labelWidth: Int, showLabelColumn: Bool, useColor: Bool, reserveLockColumn: Bool, now: Date) -> String {
         let lockGlyph = useColor ? "🔒" : "[L]"
         // Pad spaces wide enough to keep alignment when a glyph is absent.
         let lockSpacer = useColor ? "  " : "   "
@@ -115,9 +115,10 @@ struct List: ParsableCommand {
         }
         let slotColumn = "Slot \(row.slot)\(lockColumn)"
         let description = row.description ?? "(empty)"
+        let ageSuffix = ageSuffixIfAvailable(row: row, now: now)
 
         guard showLabelColumn else {
-            return "\(slotColumn): \(description)"
+            return "\(slotColumn): \(description)\(ageSuffix)"
         }
 
         let labelText = row.label ?? ""
@@ -126,7 +127,18 @@ struct List: ParsableCommand {
             ? "\u{001B}[36m\(paddedLabel)\u{001B}[0m"
             : paddedLabel
 
-        return "\(slotColumn)  \(coloredLabel)  \(description)"
+        return "\(slotColumn)  \(coloredLabel)  \(description)\(ageSuffix)"
+    }
+
+    /// Returns " (5m ago)" when the row has both content and a usable
+    /// `updatedAt`, or an empty string otherwise (empty slots, missing
+    /// manifest entries). Empty slots stay clean.
+    private func ageSuffixIfAvailable(row: Row, now: Date) -> String {
+        guard row.description != nil,
+              let updatedAt = row.updatedAt,
+              let date = ISO8601DateFormatter().date(from: updatedAt)
+        else { return "" }
+        return " (\(relativeAge(from: date, to: now)))"
     }
 
     private func printVerbose(row: Row, useColor: Bool, now: Date) {

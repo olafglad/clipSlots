@@ -37,6 +37,10 @@ struct Paths {
         slotsDirectory.appendingPathComponent("locks.json")
     }
 
+    static var expiryStateFile: URL {
+        slotsDirectory.appendingPathComponent("expiry_state.json")
+    }
+
     static func slotDirectory(_ slot: Int) -> URL {
         slotsDirectory.appendingPathComponent(String(slot))
     }
