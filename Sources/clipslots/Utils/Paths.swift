@@ -45,6 +45,17 @@ struct Paths {
         slotsDirectory.appendingPathComponent(String(slot))
     }
 
+    /// Per-slot previous-content snapshot for `undo`. Lives outside
+    /// `slotDirectory(_:)` because `SlotStorage.setSlot` wipes the whole
+    /// slot dir on every write.
+    static var prevSnapshotsDirectory: URL {
+        slotsDirectory.appendingPathComponent(".prev")
+    }
+
+    static func slotPrevDirectory(_ slot: Int) -> URL {
+        prevSnapshotsDirectory.appendingPathComponent(String(slot))
+    }
+
     static func slotItemDirectory(_ slot: Int, itemIndex: Int) -> URL {
         slotDirectory(slot).appendingPathComponent("item_\(itemIndex)")
     }

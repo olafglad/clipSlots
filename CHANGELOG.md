@@ -15,6 +15,28 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.11.0] - 2026-05-27
+
+### Added
+- `clipslots undo <n>` restores slot `n` to its previous content.
+  One level of history is kept per slot: every successful save (CLI or
+  hotkey) and every append snapshots the prior content first. Running
+  `undo` again on the same slot round-trips back to where you started,
+  since `undo` swaps current and prev rather than consuming prev.
+
+### Behavior
+- Locked slots refuse `undo` with the same message as `clear`/save —
+  lock is the hard guarantee, undo never bypasses it.
+- Slots with no prior content (never written, or already undone twice
+  in a row past the round-trip) return a non-zero "No previous content"
+  error.
+- `clear` and `clear --force` wipe the undo history alongside the slot
+  itself. The expiry sweep does the same. Otherwise `clear` followed by
+  `undo` would resurrect content the user just asked to delete.
+- Storage cost is at most one extra copy per slot (under
+  `slots/.prev/<n>/`). The snapshot lives outside the slot dir so the
+  atomic save-swap doesn't wipe it.
+
 ## [1.10.0] - 2026-05-27
 
 ### Added
@@ -207,6 +229,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.11.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.11.0
 [1.10.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.10.0
 [1.9.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.9.0
 [1.8.1]: https://github.com/olafglad/clipSlots/releases/tag/v1.8.1

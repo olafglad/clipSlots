@@ -2,11 +2,14 @@ import Foundation
 
 enum SlotStorageError: Error, LocalizedError {
     case slotLocked(Int)
+    case noUndoAvailable(Int)
 
     var errorDescription: String? {
         switch self {
         case .slotLocked(let n):
             return "Slot \(n) is locked. Run `clipslots unlock \(n)` first."
+        case .noUndoAvailable(let n):
+            return "No previous content for slot \(n)."
         }
     }
 }
@@ -191,6 +194,11 @@ class SlotStorage {
                 }
             }
 
+            // Snapshot current slot dir into the prev location before the
+            // atomic swap, so `undo` can restore it. One level of history
+            // only — any older prev is replaced.
+            try snapshotCurrentAsPrev(slotNumber: slotNumber)
+
             // Atomic swap: remove old, rename temp into place
             if fm.fileExists(atPath: slotDir.path) {
                 try fm.removeItem(at: slotDir)
@@ -205,6 +213,83 @@ class SlotStorage {
         }
     }
 
+    // MARK: - Undo (one level)
+
+    /// Returns true if there is a previous-content snapshot for this slot.
+    func hasPrev(_ slotNumber: Int) -> Bool {
+        fm.fileExists(atPath: Paths.slotPrevDirectory(slotNumber).path)
+    }
+
+    /// Restores the slot to its previous content, atomically swapping
+    /// current and prev so a follow-up `undo` round-trips. Throws
+    /// `slotLocked` on a locked slot (locks are the hard guarantee;
+    /// `undo` must not silently bypass them) and `noUndoAvailable` when
+    /// no prev snapshot exists.
+    func undo(_ slotNumber: Int) throws {
+        if isLocked(slotNumber) {
+            throw SlotStorageError.slotLocked(slotNumber)
+        }
+        let prevDir = Paths.slotPrevDirectory(slotNumber)
+        guard fm.fileExists(atPath: prevDir.path) else {
+            throw SlotStorageError.noUndoAvailable(slotNumber)
+        }
+        let slotDir = Paths.slotDirectory(slotNumber)
+        let pid = ProcessInfo.processInfo.processIdentifier
+        let stash = Paths.prevSnapshotsDirectory.appendingPathComponent(".swap_\(slotNumber)_\(pid)")
+
+        try Paths.ensureDirectoryExists(at: Paths.prevSnapshotsDirectory)
+        if fm.fileExists(atPath: stash.path) {
+            try fm.removeItem(at: stash)
+        }
+
+        // Move current → stash (if any), prev → current, stash → prev.
+        // Whole-directory renames are atomic on the same volume.
+        let hadCurrent = fm.fileExists(atPath: slotDir.path)
+        if hadCurrent {
+            try fm.moveItem(at: slotDir, to: stash)
+        }
+        do {
+            try fm.moveItem(at: prevDir, to: slotDir)
+        } catch {
+            // Restore on failure: put current back if we moved it.
+            if hadCurrent, fm.fileExists(atPath: stash.path) {
+                try? fm.moveItem(at: stash, to: slotDir)
+            }
+            throw error
+        }
+        if hadCurrent {
+            try fm.moveItem(at: stash, to: prevDir)
+        }
+        try updateManifest()
+    }
+
+    /// Captures the current on-disk slot dir as the prev snapshot.
+    /// No-op when the slot dir is empty (i.e. first write).
+    private func snapshotCurrentAsPrev(slotNumber: Int) throws {
+        let slotDir = Paths.slotDirectory(slotNumber)
+        guard fm.fileExists(atPath: slotDir.path) else { return }
+        try Paths.ensureDirectoryExists(at: Paths.prevSnapshotsDirectory)
+        let prevDir = Paths.slotPrevDirectory(slotNumber)
+        if fm.fileExists(atPath: prevDir.path) {
+            try fm.removeItem(at: prevDir)
+        }
+        // Copy rather than move: setSlot's atomic swap still needs to
+        // remove `slotDir` itself; moving here would leave nothing for
+        // that removeItem to find on a same-volume rename, which is
+        // fine, but copying keeps setSlot's existing remove+rename
+        // sequence intact and lets us bail without a half-finished
+        // swap if the rename below ever fails.
+        try fm.copyItem(at: slotDir, to: prevDir)
+    }
+
+    /// Removes the prev snapshot for a slot. Safe to call when none exists.
+    private func clearPrev(_ slotNumber: Int) throws {
+        let prevDir = Paths.slotPrevDirectory(slotNumber)
+        if fm.fileExists(atPath: prevDir.path) {
+            try fm.removeItem(at: prevDir)
+        }
+    }
+
     func clearSlot(_ slotNumber: Int) throws {
         if isLocked(slotNumber) {
             throw SlotStorageError.slotLocked(slotNumber)
@@ -213,6 +298,9 @@ class SlotStorage {
         if fm.fileExists(atPath: slotDir.path) {
             try fm.removeItem(at: slotDir)
         }
+        // Wipe the undo history too — otherwise `clear` followed by
+        // `undo` would resurrect what the user just asked to delete.
+        try clearPrev(slotNumber)
         var labels = loadLabels()
         removeLabel(slotNumber, persisting: &labels)
         try writeLabels(labels)
@@ -230,6 +318,7 @@ class SlotStorage {
             if fm.fileExists(atPath: slotDir.path) {
                 try fm.removeItem(at: slotDir)
             }
+            try clearPrev(i)
             labels.removeValue(forKey: String(i))
         }
         try writeLabels(labels)
@@ -294,6 +383,7 @@ class SlotStorage {
 
             if now.timeIntervalSince(ageBasis) >= olderThanSeconds {
                 try fm.removeItem(at: slotDir)
+                try clearPrev(i)
                 labels.removeValue(forKey: String(i))
                 cleared.append((slot: i, mtime: mtime))
             }
