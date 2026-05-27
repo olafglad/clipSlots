@@ -8,7 +8,13 @@ struct Permissions: ParsableCommand {
     )
 
     mutating func run() throws {
-        let accessible = AXIsProcessTrusted()
+        // Use the prompt variant so TCC registers the binary and macOS shows its
+        // native prompt the first time. This guarantees "clipslots" appears in
+        // the Accessibility list — without it, fresh users sometimes have to
+        // drag the binary in by hand.
+        let accessible = AXIsProcessTrustedWithOptions(
+            [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
+        )
 
         print("Accessibility: \(accessible ? "Granted" : "Not granted")")
         print("")
@@ -21,7 +27,6 @@ struct Permissions: ParsableCommand {
             print("To grant permission:")
             print("1. Open System Settings > Privacy & Security > Accessibility")
             print("2. Find \"clipslots\" in the list and toggle it ON")
-            print("3. If it's not listed, click \"+\" and add the clipslots binary")
             print("")
 
             let process = Process()

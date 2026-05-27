@@ -15,6 +15,30 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.14.0] - 2026-05-27
+
+### Added
+- **Homebrew tap is now a real, working install path.** `brew install
+  olafglad/clipslots/clipslots` ships the prebuilt universal binary instead
+  of compiling from source — no Xcode required, install completes in
+  seconds. The release workflow auto-bumps the tap formula on every tagged
+  release.
+- **Stable `.pkg` download URL.** The release workflow now publishes
+  `ClipSlots.pkg` alongside the versioned filename, so README + landing
+  page can link directly to
+  `https://github.com/olafglad/clipSlots/releases/latest/download/ClipSlots.pkg`
+  for a true one-click installer download.
+- Landing page (`docs/`) refresh and new in-repo docs reference page
+  (`docs/docs/`) covering the full command surface, file layout, and
+  configuration — the long-deferred Phase 2 docs roadmap item.
+
+### Changed
+- `clipslots permissions` now calls `AXIsProcessTrustedWithOptions` with
+  the prompt option enabled. This guarantees the binary registers with
+  TCC and the native macOS Accessibility prompt is shown on first run,
+  so fresh users always see "clipslots" in the Accessibility list
+  instead of having to drag the binary in by hand.
+
 ## [1.13.1] - 2026-05-27
 
 ### Changed
@@ -304,6 +328,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.14.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.14.0
 [1.13.1]: https://github.com/olafglad/clipSlots/releases/tag/v1.13.1
 [1.13.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.13.0
 [1.12.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.12.0

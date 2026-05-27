@@ -689,6 +689,89 @@ section {
   display: grid;
 }
 
+@media (max-width: 900px) {
+  .cards-with-icons-container {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .cards-with-icons-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 9th tile — "Full command reference" as a distinct end-cap. */
+.card-with-icon.reference-tile {
+  background-color: var(--color-accent-b);
+  border: 1px solid var(--color-border-level-3);
+  border-radius: var(--radius-l);
+  padding: 24px;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 180px;
+  transition: background-color 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+}
+
+.card-with-icon.reference-tile:hover {
+  background-color: var(--color-accent-b-hover);
+  border-color: var(--color-teal, #7DDFB0);
+  transform: translateY(-2px);
+}
+
+.reference-tile-label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-s);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-teal, #7DDFB0);
+}
+
+.reference-tile-title {
+  font-size: var(--font-size-l);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  margin: 12px 0 0;
+}
+
+.reference-tile-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-teal, #7DDFB0);
+  font-size: var(--font-size-m);
+  font-weight: 500;
+  margin-top: 16px;
+  transition: gap 0.18s ease;
+}
+
+.card-with-icon.reference-tile:hover .reference-tile-arrow {
+  gap: 14px;
+}
+
+.reference-tile-arrow .icon {
+  color: inherit;
+}
+
+/* Demo gif (replaces the static terminal block) */
+.demo-gif-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.demo-gif {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--color-border-level-3);
+  border-radius: var(--radius-l);
+  box-shadow: 0 8px 32px rgba(139, 95, 191, 0.25);
+}
+
 .card-code-block {
   padding: var(--space-card-m);
   border: 1px solid var(--color-border-level-2);
@@ -1040,7 +1123,7 @@ section {
   justify-content: center;
 }
 
-.resource-proof img {
+.resource-proof > img {
   border: 1px solid var(--color-border-level-3);
   border-radius: var(--radius-l);
   width: 100%;
@@ -1049,6 +1132,106 @@ section {
 
 .resource-caption {
   margin-top: 12px;
+}
+
+/* ============================================================
+   Faux Activity Monitor cards
+   Pure HTML/CSS replicas of the macOS Activity Monitor UI —
+   crisper than any screenshot at any DPR.
+   ============================================================ */
+
+.monitor-card {
+  width: 100%;
+  max-width: 340px;
+  background: linear-gradient(180deg, #2A2240 0%, #211934 100%);
+  border: 1px solid rgba(240, 235, 245, 0.18);
+  border-radius: 10px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 12px 32px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
+    var(--font-text);
+  color: var(--color-text-primary);
+  user-select: none;
+}
+
+.monitor-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(240, 235, 245, 0.92);
+  background: linear-gradient(180deg, #322648 0%, #2A2040 100%);
+  border-bottom: 1px solid rgba(240, 235, 245, 0.12);
+  letter-spacing: 0.1px;
+}
+
+.monitor-col-name {
+  flex: 1;
+}
+
+.monitor-divider {
+  width: 1px;
+  height: 14px;
+  background-color: rgba(240, 235, 245, 0.18);
+  margin: 0 14px;
+}
+
+.monitor-col-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 90px;
+  justify-content: flex-end;
+}
+
+.monitor-chevron {
+  font-size: 9px;
+  color: rgba(240, 235, 245, 0.55);
+}
+
+.monitor-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  font-size: 14px;
+  background-color: rgba(125, 223, 176, 0.04); /* faint highlight as if row-selected */
+}
+
+.monitor-process {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(240, 235, 245, 0.95);
+  font-weight: 400;
+}
+
+.monitor-app-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.monitor-value {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(240, 235, 245, 0.95);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  min-width: 80px;
+}
+
+.monitor-unit {
+  color: rgba(240, 235, 245, 0.6);
+  margin-left: 2px;
 }
 
 /* Promo CTA button overrides for dark bg */

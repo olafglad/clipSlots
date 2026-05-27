@@ -53,6 +53,10 @@ jobs:
             --scripts scripts/ \
             "ClipSlots-${{ steps.version.outputs.VERSION }}.pkg"
 
+          # Also publish under a stable filename so README / landing page can link
+          # directly to /releases/latest/download/ClipSlots.pkg
+          cp "ClipSlots-${{ steps.version.outputs.VERSION }}.pkg" "ClipSlots.pkg"
+
       - name: Create binary tarball
         run: |
           tar czf "clipslots-${{ steps.version.outputs.VERSION }}-universal.tar.gz" clipslots
@@ -112,4 +116,44 @@ jobs:
             Download `clipslots-${{ steps.version.outputs.VERSION }}-universal.tar.gz`, extract, copy to `/usr/local/bin`, and run `clipslots permissions`.
           files: |
             ClipSlots-${{ steps.version.outputs.VERSION }}.pkg
+            ClipSlots.pkg
             clipslots-${{ steps.version.outputs.VERSION }}-universal.tar.gz
+
+      - name: Compute tarball sha256
+        id: sha
+        run: |
+          SHA=$(shasum -a 256 "clipslots-${{ steps.version.outputs.VERSION }}-universal.tar.gz" | awk '{print $1}')
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout homebrew tap
+        uses: actions/checkout@v4
+        with:
+          repository: olafglad/homebrew-clipslots
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+
+      - name: Bump formula
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          SHA="${{ steps.sha.outputs.sha }}"
+          cd tap
+          # macos sed needs -i ''; ubuntu sed needs -i. Runner is macos-14, so '' form.
+          sed -i '' -E "s|^  url \".*\"|  url \"https://github.com/olafglad/clipSlots/releases/download/v${VERSION}/clipslots-${VERSION}-universal.tar.gz\"|" Formula/clipslots.rb
+          sed -i '' -E "s|^  sha256 \".*\"|  sha256 \"${SHA}\"|" Formula/clipslots.rb
+          sed -i '' -E "s|^  version \".*\"|  version \"${VERSION}\"|" Formula/clipslots.rb
+          echo "--- updated formula ---"
+          cat Formula/clipslots.rb
+
+      - name: Commit and push tap
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Formula/clipslots.rb
+          if git diff --staged --quiet; then
+            echo "Formula already up-to-date; nothing to commit."
+            exit 0
+          fi
+          git commit -m "clipslots ${VERSION}"
+          git push origin main

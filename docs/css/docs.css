@@ -1,0 +1,424 @@
+/* ============================================================
+   ClipSlots documentation page
+   Layered on top of index.css — uses the same design tokens.
+   ============================================================ */
+
+/* The docs page uses a sidebar + content split. Page-container's
+   width (1008px) stays consistent with the landing page. */
+
+.docs-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 48px;
+  margin-top: 48px;
+  align-items: start;
+}
+
+/* ============================================================
+   Sidebar
+   ============================================================ */
+
+.docs-sidebar {
+  position: sticky;
+  top: 96px;   /* below nav-container + breathing room */
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-level-3) transparent;
+}
+
+.docs-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.docs-sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-level-3);
+  border-radius: 3px;
+}
+
+.docs-sidebar-toggle {
+  display: none;       /* hidden on desktop; shown on mobile */
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-level-2);
+  border-radius: var(--radius-m);
+  color: var(--color-text-primary);
+  font-family: var(--font-text);
+  font-size: var(--font-size-m);
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.docs-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.docs-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.docs-nav-title {
+  font-family: var(--font-text);
+  font-size: var(--font-size-s);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 6px;
+  padding-left: 8px;
+}
+
+.docs-nav-link {
+  display: block;
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-s);
+  line-height: 1.5;
+  text-decoration: none;
+  border-left: 2px solid transparent;
+}
+
+.docs-nav-link code {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: inherit;
+  background: transparent;
+  padding: 0;
+}
+
+.docs-nav-link:hover {
+  color: var(--color-text-primary);
+  background-color: var(--color-surface);
+}
+
+.docs-nav-link.active {
+  color: var(--color-teal);
+  background-color: var(--color-accent-b);
+  border-left-color: var(--color-teal);
+}
+
+/* ============================================================
+   Content column
+   ============================================================ */
+
+.docs-content {
+  min-width: 0;        /* let code blocks shrink instead of overflowing */
+}
+
+.docs-header {
+  margin-bottom: 48px;
+}
+
+.docs-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-s);
+  color: var(--color-teal);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 12px;
+}
+
+.docs-h1 {
+  font-size: var(--font-size-xl);
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+  margin: 0 0 12px;
+}
+
+.docs-section {
+  padding: 0;
+  margin-bottom: 64px;
+}
+
+.docs-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.docs-h2 {
+  font-size: 32px;
+  line-height: 1.2;
+  letter-spacing: -1px;
+  margin: 0 0 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--color-border-level-2);
+  color: var(--color-text-primary);
+}
+
+.docs-block {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--color-border-level-2);
+  scroll-margin-top: 96px;  /* offset for sticky nav when anchor-scrolling */
+}
+
+.docs-block:last-child {
+  border-bottom: none;
+}
+
+.docs-h3 {
+  font-size: 22px;
+  line-height: 1.3;
+  letter-spacing: -0.5px;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-primary);
+}
+
+.docs-h3 code {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  background: var(--color-accent-b);
+  color: var(--color-teal);
+  padding: 2px 10px;
+  border-radius: var(--radius-s);
+  font-weight: 600;
+}
+
+.docs-anchor {
+  color: var(--color-text-tertiary);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 400;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+  margin-left: 4px;
+}
+
+.docs-h3:hover .docs-anchor {
+  opacity: 1;
+}
+
+.docs-anchor:hover {
+  color: var(--color-teal);
+}
+
+/* ============================================================
+   Code blocks
+   ============================================================ */
+
+.docs-code {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.6;
+  background-color: #17112A;
+  border: 1px solid var(--color-border-level-2);
+  border-radius: var(--radius-m);
+  padding: 14px 18px;
+  margin: 12px 0;
+  overflow-x: auto;
+  color: #C9BFD9;
+}
+
+.docs-code code {
+  font-family: inherit;
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+/* Terminal-style tokens inside .docs-code */
+.docs-code .c {            /* shell prompt */
+  color: #7DDFB0;
+  user-select: none;
+  margin-right: 8px;
+}
+
+.docs-code .arg {          /* placeholder like <slot> */
+  color: #B088D0;
+}
+
+.docs-code .comment {      /* # comments */
+  color: #7B6A96;
+  font-style: italic;
+}
+
+/* ============================================================
+   Tables
+   ============================================================ */
+
+.docs-table-wrapper {
+  margin: 16px 0;
+  overflow-x: auto;
+  border: 1px solid var(--color-border-level-2);
+  border-radius: var(--radius-m);
+}
+
+.docs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-s);
+}
+
+.docs-table th,
+.docs-table td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-border-level-2);
+  vertical-align: top;
+}
+
+.docs-table th {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  background-color: var(--color-surface);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.docs-table td {
+  color: var(--color-text-secondary);
+}
+
+.docs-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ============================================================
+   FAQ / details
+   ============================================================ */
+
+.docs-faq {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-level-2);
+  border-radius: var(--radius-m);
+  padding: 12px 18px;
+  margin: 10px 0;
+  transition: border-color 0.15s ease;
+}
+
+.docs-faq[open] {
+  border-color: var(--color-border-level-3);
+}
+
+.docs-faq summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  list-style: none;
+  padding: 4px 0;
+  position: relative;
+  padding-right: 24px;
+}
+
+.docs-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.docs-faq summary::after {
+  content: "+";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--color-text-tertiary);
+  font-weight: 400;
+  transition: transform 0.2s ease;
+}
+
+.docs-faq[open] summary::after {
+  content: "−";
+}
+
+.docs-faq summary:hover {
+  color: var(--color-teal);
+}
+
+.docs-faq[open] summary {
+  color: var(--color-teal);
+  margin-bottom: 4px;
+}
+
+.docs-faq p {
+  margin: 6px 0 4px;
+}
+
+/* ============================================================
+   <kbd> styling (used in first-time setup)
+   ============================================================ */
+
+.docs-content kbd {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-level-3);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  padding: 2px 6px;
+  color: var(--color-text-primary);
+}
+
+/* ============================================================
+   Footer CTA
+   ============================================================ */
+
+.docs-footer-cta {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--color-border-level-2);
+  text-align: center;
+}
+
+/* ============================================================
+   Active nav-link in top nav
+   ============================================================ */
+
+.nav-link.active {
+  color: var(--color-text-primary);
+  background-color: var(--color-surface);
+}
+
+/* ============================================================
+   Mobile: collapse sidebar behind a toggle
+   ============================================================ */
+
+@media (max-width: 900px) {
+  .docs-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .docs-sidebar {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
+  }
+
+  .docs-sidebar-toggle {
+    display: flex;
+  }
+
+  .docs-nav {
+    display: none;
+    padding: 16px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border-level-2);
+    border-radius: var(--radius-m);
+  }
+
+  .docs-sidebar.open .docs-nav {
+    display: flex;
+  }
+
+  .docs-h1 {
+    font-size: 36px;
+  }
+
+  .docs-h2 {
+    font-size: 26px;
+  }
+}

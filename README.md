@@ -58,7 +58,7 @@ Done. Hotkeys are live.
 <details>
 <summary>Other install methods</summary>
 
-**Download the `.pkg`** from the [latest release](https://github.com/olafglad/clipSlots/releases/latest).
+**[Download `ClipSlots.pkg`](https://github.com/olafglad/clipSlots/releases/latest/download/ClipSlots.pkg)** (always points at the latest release). Double-click to install, then run `clipslots permissions && clipslots start`.
 
 **Build from source:**
 
