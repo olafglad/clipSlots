@@ -15,6 +15,24 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.10.0] - 2026-05-27
+
+### Added
+- Optional sound feedback on successful save/paste/append from a hotkey.
+  Set `feedback = "sound"` in `~/.config/clipslots/config.toml` to enable;
+  default is `"off"`. Plays the macOS system "Pop" sound — short and
+  unobtrusive. Useful confirmation that the hotkey actually fired,
+  especially in apps where the save/paste action has no visible effect.
+
+### Behavior
+- Fires only on the success path. Skipped cases (locked target, empty
+  clipboard, non-text append source/target, missing Accessibility
+  permission, storage errors) stay silent — logs already cover them.
+- Daemon hotkeys only. The CLI `save` / `paste` commands never play a
+  sound regardless of the config value; they're typically scripted.
+- Volume follows the system sound effects slider and is muted by Do Not
+  Disturb / Focus modes, matching every other macOS UI sound.
+
 ## [1.9.0] - 2026-05-27
 
 ### Added
@@ -189,6 +207,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.10.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.10.0
 [1.9.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.9.0
 [1.8.1]: https://github.com/olafglad/clipSlots/releases/tag/v1.8.1
 [1.8.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.8.0
