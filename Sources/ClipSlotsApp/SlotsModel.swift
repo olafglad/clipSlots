@@ -98,6 +98,9 @@ final class SlotsModel: ObservableObject {
     var closePopover: () -> Void = {}
     var pasteIntoPreviousApp: (Int) -> Void = { _ in }
     var showOnboarding: () -> Void = {}
+    var panelDragChanged: () -> Void = {}
+    var panelDragEnded: () -> Void = {}
+    var resetPanelPosition: () -> Void = {}
 
     private var watcher: SlotsWatcher?
     private var toastWork: DispatchWorkItem?

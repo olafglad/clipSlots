@@ -2,18 +2,17 @@ import AppKit
 import ClipSlotsCore
 import SwiftUI
 
-final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate {
     private var engine: AppEngine!
     private var model: SlotsModel!
     private var statusItem: NSStatusItem!
-    private let popover = NSPopover()
+    private var panel: PanelController!
     private var onboarding: OnboardingWindowController?
     private var keyMonitor: Any?
-    /// The app that was frontmost before the popover opened; Paste sends
-    /// Cmd+V back to it.
+    /// The app that was frontmost before the panel opened. The panel never
+    /// activates ClipSlots, so this only matters when something else did
+    /// (e.g. the setup window) and focus has to be handed back for Paste.
     private var previousApp: NSRunningApplication?
-
-    private static let backgroundViewID = NSUserInterfaceItemIdentifier("clipslots.popover.background")
 
     static var version: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev"
@@ -41,16 +40,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
 
         model = SlotsModel(engine: engine, version: Self.version)
-        model.closePopover = { [weak self] in self?.closePopover() }
+        model.closePopover = { [weak self] in self?.closePanel() }
         model.pasteIntoPreviousApp = { [weak self] n in self?.paste(slot: n) }
         model.showOnboarding = { [weak self] in self?.showOnboarding() }
 
         engine.onConfigReload = { [weak self] in self?.model.reload() }
-        engine.onPopoverHotkey = { [weak self] in self?.togglePopover() }
+        engine.onPopoverHotkey = { [weak self] in self?.togglePanel() }
         engine.start()
 
         setUpStatusItem()
-        setUpPopover()
+        setUpPanel()
         setUpKeyMonitor()
 
         if !AXIsProcessTrusted() {
@@ -62,7 +61,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         engine?.stop()
     }
 
-    // MARK: - Status item & popover
+    // MARK: - Status item & panel
 
     private func setUpStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
@@ -74,30 +73,41 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         button.toolTip = "ClipSlots (\(KeybindText.pretty(engine.config.keybinds.popover, slots: 1)))"
     }
 
-    private func setUpPopover() {
-        popover.behavior = .transient
-        popover.animates = true
-        popover.appearance = NSAppearance(named: .darkAqua)
-        popover.delegate = self
-        let hosting = NSHostingController(rootView: PopoverView(model: model))
-        hosting.sizingOptions = [.preferredContentSize]
-        popover.contentViewController = hosting
+    private func setUpPanel() {
+        var controller: PanelController!
+        controller = PanelController(rootView: PanelRootView(model: model) { size in
+            controller?.contentSizeChanged(size)
+        })
+        controller.onHide = { [weak self] in
+            self?.model.dragSource = nil
+            self?.model.dropTarget = nil
+            self?.model.peekSlot = nil
+        }
+        model.panelDragChanged = { controller?.dragChanged() }
+        model.panelDragEnded = { controller?.dragEnded() }
+        model.resetPanelPosition = { [weak self] in
+            controller?.resetPosition()
+            self?.closePanel()
+            self?.showPanel()
+        }
+        panel = controller
     }
 
     @objc private func statusItemClicked() {
-        togglePopover()
+        // The click itself already hid the panel (it lost focus); don't reopen.
+        if panel.justHid { return }
+        togglePanel()
     }
 
-    private func togglePopover() {
-        if popover.isShown {
-            closePopover()
+    private func togglePanel() {
+        if panel.isVisible {
+            closePanel()
         } else {
-            showPopover()
+            showPanel()
         }
     }
 
-    private func showPopover() {
-        guard let button = statusItem.button else { return }
+    private func showPanel() {
         let front = NSWorkspace.shared.frontmostApplication
         if front?.processIdentifier != ProcessInfo.processInfo.processIdentifier {
             previousApp = front
@@ -109,56 +119,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         model.dragSource = nil
         model.dropTarget = nil
 
-        NSApp.activate(ignoringOtherApps: true)
-        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-        paintPopoverBackground()
-        popover.contentViewController?.view.window?.makeKey()
+        panel.show(below: statusItem.button)
         NotificationCenter.default.post(name: .clipSlotsFocusFilter, object: nil)
     }
 
-    /// Closes the popover and hands focus back to the app the user came
-    /// from, so a ⌘V right after Copy lands there. Skipped while the setup
-    /// window is open (hiding would take it down too).
-    private func closePopover() {
-        if popover.isShown { popover.performClose(nil) }
-        if onboarding?.window?.isVisible != true {
-            NSApp.hide(nil)
-        }
-    }
-
-    /// NSPopover draws its own material (arrow included). Slip a solid
-    /// brand-colored view under the content so popover and arrow match the
-    /// mockup's #1E1430 instead of the system's translucent gray.
-    private func paintPopoverBackground() {
-        guard let frameView = popover.contentViewController?.view.window?.contentView?.superview,
-              !frameView.subviews.contains(where: { $0.identifier == Self.backgroundViewID }) else { return }
-        let background = NSView(frame: frameView.bounds)
-        background.identifier = Self.backgroundViewID
-        background.wantsLayer = true
-        background.layer?.backgroundColor = Theme.backgroundNS.cgColor
-        background.autoresizingMask = [.width, .height]
-        frameView.addSubview(background, positioned: .below, relativeTo: nil)
-    }
-
-    func popoverDidClose(_ notification: Notification) {
-        model.dragSource = nil
-        model.dropTarget = nil
-        model.peekSlot = nil
+    private func closePanel() {
+        panel.hide()
     }
 
     private func paste(slot n: Int) {
-        closePopover()
-        previousApp?.activate(options: [])
-        // Give the target app a moment to become key before Cmd+V lands.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
+        closePanel()
+        // Normally the previous app is still frontmost (the panel doesn't
+        // activate us). If ClipSlots got activated meanwhile, hand focus back.
+        if NSApp.isActive {
+            previousApp?.activate(options: [])
+        }
+        // Give the target window a moment to become key before Cmd+V lands.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
             self?.engine.hotkeys.paste(slot: n)
         }
     }
 
     private func showOnboarding() {
-        if popover.isShown { popover.performClose(nil) }
+        guard !AXIsProcessTrusted() else {
+            model.refreshAccessibility()
+            return
+        }
+        closePanel()
         if onboarding == nil {
-            onboarding = OnboardingWindowController(model: model)
+            onboarding = OnboardingWindowController(model: model) { [weak self] in
+                // Granted: get out of the way and show what the user came for.
+                self?.showPanel()
+            }
         }
         onboarding?.present()
     }
@@ -171,8 +163,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     /// filter is never hijacked.
     private func setUpKeyMonitor() {
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            guard let self = self, self.popover.isShown,
-                  event.window == self.popover.contentViewController?.view.window else { return event }
+            guard let self = self, self.panel.isVisible, event.window === self.panel.panel else { return event }
             return self.handleKey(event) ? nil : event
         }
     }
@@ -187,7 +178,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             } else if !model.filter.isEmpty {
                 model.filter = ""
             } else {
-                closePopover()
+                closePanel()
             }
             return true
         }

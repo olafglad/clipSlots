@@ -116,6 +116,18 @@ struct SlotListView: View {
         .padding(.leading, 10)
         .padding(.trailing, 12)
         .padding(.vertical, 12)
+        .contentShape(Rectangle())
+        // The header is the panel's handle: drag it anywhere, and it
+        // reopens in that spot next time.
+        .gesture(
+            DragGesture(minimumDistance: 2, coordinateSpace: .global)
+                .onChanged { _ in model.panelDragChanged() }
+                .onEnded { _ in model.panelDragEnded() }
+        )
+        .onHover { inside in
+            if inside { NSCursor.openHand.push() } else { NSCursor.pop() }
+        }
+        .help("Drag to move")
     }
 
     private var settingsMenu: some View {
@@ -125,7 +137,10 @@ struct SlotListView: View {
                 set: { model.setLaunchAtLogin($0) }
             ))
             Button("Edit config file…") { model.openConfigFile() }
-            Button("Accessibility setup…") { model.showOnboarding() }
+            Button("Move back under the menubar icon") { model.resetPanelPosition() }
+            if !model.accessibilityGranted {
+                Button("Accessibility setup…") { model.showOnboarding() }
+            }
             Divider()
             Button("About ClipSlots") {
                 NSApp.activate(ignoringOtherApps: true)

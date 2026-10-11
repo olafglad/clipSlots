@@ -45,7 +45,7 @@ enum Snapshot {
             model.peekSlot = nil
         }
 
-        render(OnboardingView(model: model, onDone: {}), to: dir.appendingPathComponent("onboarding.png"))
+        render(OnboardingView(model: model), to: dir.appendingPathComponent("onboarding.png"))
         print("snapshot: wrote PNGs to \(dir.path)")
     }
 
