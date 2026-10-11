@@ -1,9 +1,11 @@
 import AppKit
 import SwiftUI
 
-/// Small purple checkmark that pops up next to the mouse pointer to confirm
-/// a copy, then fades. Click-through and never takes focus, so it can't get
-/// in the way of the ⌘V that usually follows.
+/// Small purple checkmark that sits on top of the mouse pointer to confirm
+/// a copy, follows it while visible, then fades. Click-through and never
+/// takes focus, so it can't get in the way of the ⌘V that usually follows.
+/// (The real cursor can't be swapped: macOS only lets the frontmost app set
+/// it, and ClipSlots deliberately never becomes frontmost.)
 final class CursorHUD {
     static let shared = CursorHUD()
 
@@ -24,15 +26,31 @@ final class CursorHUD {
         return panel
     }()
     private var fadeWork: DispatchWorkItem?
+    private var followTimer: Timer?
+
+    /// Centre of the badge relative to the pointer's hotspot (the arrow's
+    /// tip): nudged down-right so the circle covers the arrow's body.
+    private let offset = NSPoint(x: 5, y: -7)
+
+    private func frameAtPointer() -> NSRect {
+        let mouse = NSEvent.mouseLocation
+        return NSRect(x: mouse.x + offset.x - size / 2, y: mouse.y + offset.y - size / 2, width: size, height: size)
+    }
 
     func flashCheckmark() {
-        let mouse = NSEvent.mouseLocation
-        // Down-right of the pointer tip, clear of the arrow itself.
-        panel.setFrame(NSRect(x: mouse.x + 10, y: mouse.y - 12 - size, width: size, height: size), display: false)
+        panel.setFrame(frameAtPointer(), display: false)
         // A fresh view each time so the pop-in animation replays.
         panel.contentView = NSHostingView(rootView: CheckBadge())
         panel.alphaValue = 1
         panel.orderFrontRegardless()
+
+        followTimer?.invalidate()
+        let timer = Timer(timeInterval: 1.0 / 120, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            self.panel.setFrameOrigin(self.frameAtPointer().origin)
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        followTimer = timer
 
         fadeWork?.cancel()
         let work = DispatchWorkItem { [weak self] in
@@ -41,7 +59,11 @@ final class CursorHUD {
                 context.duration = 0.25
                 panel.animator().alphaValue = 0
             }, completionHandler: {
-                if panel.alphaValue == 0 { panel.orderOut(nil) }
+                if panel.alphaValue == 0 {
+                    panel.orderOut(nil)
+                    self?.followTimer?.invalidate()
+                    self?.followTimer = nil
+                }
             })
         }
         fadeWork = work
