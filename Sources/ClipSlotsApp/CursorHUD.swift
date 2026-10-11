@@ -29,8 +29,9 @@ final class CursorHUD {
     private var followTimer: Timer?
 
     /// Centre of the badge relative to the pointer's hotspot (the arrow's
-    /// tip): nudged down-right so the circle covers the arrow's body.
-    private let offset = NSPoint(x: 5, y: -7)
+    /// tip): up and to the left, so it hugs the tip without covering the
+    /// arrow. The 24pt circle's edge ends just short of the hotspot.
+    private let offset = NSPoint(x: -11, y: 11)
 
     private func frameAtPointer() -> NSRect {
         let mouse = NSEvent.mouseLocation
