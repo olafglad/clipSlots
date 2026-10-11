@@ -3,7 +3,7 @@ BUILD_DIR = .build
 EXECUTABLE = clipslots
 DEV_CERT = ClipSlots-Dev
 
-.PHONY: all build build-debug clean run install setup-cert site
+.PHONY: all build build-debug clean run install setup-cert site app app-debug app-run app-install
 
 all: build
 
@@ -68,3 +68,26 @@ install: build
 
 site:
 	open docs/index.html
+
+# Menubar app. Signed with the ClipSlots-Dev cert when present, so the
+# Accessibility grant survives rebuilds (same trick as the CLI).
+app:
+	./scripts/build-app.sh
+
+app-debug:
+	./scripts/build-app.sh --debug
+
+# Build, quit any running copy, and launch the fresh build from .build/
+app-run: app
+	@osascript -e 'quit app id "dev.clipslots.ClipSlots"' 2>/dev/null || true
+	@sleep 0.5
+	open $(BUILD_DIR)/ClipSlots.app
+
+# Build and install to /Applications (stable path for the login item)
+app-install: app
+	@osascript -e 'quit app id "dev.clipslots.ClipSlots"' 2>/dev/null || true
+	@sleep 0.5
+	rm -rf /Applications/ClipSlots.app
+	ditto $(BUILD_DIR)/ClipSlots.app /Applications/ClipSlots.app
+	open /Applications/ClipSlots.app
+	@echo "Installed /Applications/ClipSlots.app"

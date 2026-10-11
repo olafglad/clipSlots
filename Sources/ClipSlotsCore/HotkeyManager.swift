@@ -3,19 +3,19 @@ import ApplicationServices
 import HotKey
 import Carbon
 
-class HotkeyManager {
+public class HotkeyManager {
     private var hotkeys: [HotKey] = []
     private var storage: SlotStorage
     private let clipboard: Clipboard
     private(set) var config: Config
 
-    init(config: Config, storage: SlotStorage, clipboard: Clipboard) {
+    public init(config: Config, storage: SlotStorage, clipboard: Clipboard) {
         self.config = config
         self.storage = storage
         self.clipboard = clipboard
     }
 
-    func reload(config newConfig: Config, storage newStorage: SlotStorage) {
+    public func reload(config newConfig: Config, storage newStorage: SlotStorage) {
         self.config = newConfig
         self.storage = newStorage
         registerHotkeys()
@@ -23,7 +23,7 @@ class HotkeyManager {
         log("[\(timestamp())] Config reloaded: \(newConfig.slots) slots, save=\(newConfig.keybinds.save), paste=\(newConfig.keybinds.paste), append=\(appendDesc)")
     }
 
-    func registerHotkeys() {
+    public func registerHotkeys() {
         unregisterAll()
 
         for slot in 1...config.slots {
@@ -42,7 +42,7 @@ class HotkeyManager {
         log("Registered \(hotkeys.count) hotkeys for \(config.slots) slots")
     }
 
-    func unregisterAll() {
+    public func unregisterAll() {
         hotkeys.removeAll()
     }
 
@@ -63,7 +63,7 @@ class HotkeyManager {
             guard let self = self else { return }
             switch action {
             case .save:   self.handleSave(slot: capturedSlot)
-            case .paste:  self.handlePaste(slot: capturedSlot)
+            case .paste:  self.paste(slot: capturedSlot)
             case .append: self.handleAppend(slot: capturedSlot)
             }
         }
@@ -189,7 +189,10 @@ class HotkeyManager {
         }
     }
 
-    private func handlePaste(slot: Int) {
+    /// Puts the slot on the clipboard, sends Cmd+V to the frontmost app,
+    /// then restores the previous clipboard. Used by the paste hotkey and
+    /// by the menubar app's Paste button. Needs Accessibility.
+    public func paste(slot: Int) {
         guard let content = storage.getSlot(slot) else {
             log("[\(timestamp())] Paste slot \(slot): empty")
             return
@@ -241,8 +244,13 @@ class HotkeyManager {
     // MARK: - Keybind Parsing
 
     private func parseKeybind(pattern: String, slot: Int) -> (Key, NSEvent.ModifierFlags)? {
-        let expanded = config.expandKeybind(pattern, slot: slot)
-        let parts = expanded.split(separator: "+").map { String($0).trimmingCharacters(in: .whitespaces).lowercased() }
+        HotkeyManager.parseCombo(config.expandKeybind(pattern, slot: slot))
+    }
+
+    /// Parses a fixed combo like "ctrl+option+v" into a HotKey key and
+    /// modifier set. Returns nil (after printing a warning) on unknown parts.
+    public static func parseCombo(_ combo: String) -> (Key, NSEvent.ModifierFlags)? {
+        let parts = combo.split(separator: "+").map { String($0).trimmingCharacters(in: .whitespaces).lowercased() }
 
         guard parts.count >= 2 else { return nil }
 
@@ -266,7 +274,7 @@ class HotkeyManager {
         return (key, modifiers)
     }
 
-    private func mapModifier(_ s: String) -> NSEvent.ModifierFlags? {
+    private static func mapModifier(_ s: String) -> NSEvent.ModifierFlags? {
         switch s {
         case "ctrl", "control":  return .control
         case "option", "alt":    return .option
@@ -276,7 +284,7 @@ class HotkeyManager {
         }
     }
 
-    private func mapKey(_ s: String) -> Key? {
+    private static func mapKey(_ s: String) -> Key? {
         switch s {
         case "0": return .zero
         case "1": return .one;  case "2": return .two;  case "3": return .three
@@ -295,6 +303,7 @@ class HotkeyManager {
         case "f4": return .f4;   case "f5": return .f5;   case "f6": return .f6
         case "f7": return .f7;   case "f8": return .f8;   case "f9": return .f9
         case "f10": return .f10; case "f11": return .f11; case "f12": return .f12
+        case "space": return .space
         default:  return nil
         }
     }

@@ -1,17 +1,17 @@
 import Foundation
 
-class LaunchAgentManager {
-    static let label = "com.clipslots.daemon"
-    static let plistPath = Paths.launchAgentPlist
+public class LaunchAgentManager {
+    public static let label = "com.clipslots.daemon"
+    public static let plistPath = Paths.launchAgentPlist
 
-    static func resolveBinaryPath() -> String {
+    public static func resolveBinaryPath() -> String {
         let arg0 = ProcessInfo.processInfo.arguments[0]
         if arg0.hasPrefix("/") { return arg0 }
         let cwd = FileManager.default.currentDirectoryPath
         return (cwd as NSString).appendingPathComponent(arg0)
     }
 
-    static func install() throws -> Bool {
+    public static func install() throws -> Bool {
         try Paths.ensureDirectoryExists(at: Paths.launchAgentDirectory)
 
         let binaryPath = resolveBinaryPath()
@@ -29,7 +29,7 @@ class LaunchAgentManager {
         return process.terminationStatus == 0
     }
 
-    static func uninstall() -> Bool {
+    public static func uninstall() -> Bool {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/bin/launchctl")
         process.arguments = ["unload", plistPath.path]
@@ -47,7 +47,7 @@ class LaunchAgentManager {
         return true
     }
 
-    static func isRunning() -> (running: Bool, pid: Int?) {
+    public static func isRunning() -> (running: Bool, pid: Int?) {
         let process = Process()
         let pipe = Pipe()
         process.executableURL = URL(fileURLWithPath: "/bin/launchctl")
@@ -89,7 +89,7 @@ class LaunchAgentManager {
     /// Returns the wall-clock uptime for a PID by parsing `ps -o lstart=`,
     /// or `nil` on any failure. Callers should omit uptime rather than
     /// display "unknown".
-    static func uptimeForPID(_ pid: Int) -> TimeInterval? {
+    public static func uptimeForPID(_ pid: Int) -> TimeInterval? {
         let process = Process()
         let pipe = Pipe()
         process.executableURL = URL(fileURLWithPath: "/bin/ps")

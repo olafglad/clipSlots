@@ -1,4 +1,5 @@
 import ArgumentParser
+import ClipSlotsCore
 import Foundation
 
 struct Stop: ParsableCommand {
@@ -9,6 +10,11 @@ struct Stop: ParsableCommand {
     mutating func run() throws {
         let (running, _) = LaunchAgentManager.isRunning()
         if !running {
+            if MenubarApp.isRunning {
+                print("The CLI daemon is not running; ClipSlots.app handles the hotkeys.")
+                print("Quit it from the menubar icon to stop them.")
+                return
+            }
             print("ClipSlots daemon is not running")
             return
         }

@@ -1,92 +1,92 @@
 import Foundation
 
-struct Paths {
+public struct Paths {
     private static var homeDirectory: URL {
         FileManager.default.homeDirectoryForCurrentUser
     }
 
-    static var configDirectory: URL {
+    public static var configDirectory: URL {
         homeDirectory.appendingPathComponent(".config/clipslots")
     }
 
-    static var configFile: URL {
+    public static var configFile: URL {
         configDirectory.appendingPathComponent("config.toml")
     }
 
-    static var dataDirectory: URL {
+    public static var dataDirectory: URL {
         homeDirectory.appendingPathComponent(".local/share/clipslots")
     }
 
-    static var slotsFile: URL {
+    public static var slotsFile: URL {
         dataDirectory.appendingPathComponent("slots.json")
     }
 
-    static var slotsDirectory: URL {
+    public static var slotsDirectory: URL {
         dataDirectory.appendingPathComponent("slots")
     }
 
-    static var manifestFile: URL {
+    public static var manifestFile: URL {
         slotsDirectory.appendingPathComponent("manifest.json")
     }
 
-    static var labelsFile: URL {
+    public static var labelsFile: URL {
         slotsDirectory.appendingPathComponent("labels.json")
     }
 
-    static var locksFile: URL {
+    public static var locksFile: URL {
         slotsDirectory.appendingPathComponent("locks.json")
     }
 
-    static var expiryStateFile: URL {
+    public static var expiryStateFile: URL {
         slotsDirectory.appendingPathComponent("expiry_state.json")
     }
 
-    static func slotDirectory(_ slot: Int) -> URL {
+    public static func slotDirectory(_ slot: Int) -> URL {
         slotsDirectory.appendingPathComponent(String(slot))
     }
 
     /// Per-slot previous-content snapshot for `undo`. Lives outside
     /// `slotDirectory(_:)` because `SlotStorage.setSlot` wipes the whole
     /// slot dir on every write.
-    static var prevSnapshotsDirectory: URL {
+    public static var prevSnapshotsDirectory: URL {
         slotsDirectory.appendingPathComponent(".prev")
     }
 
-    static func slotPrevDirectory(_ slot: Int) -> URL {
+    public static func slotPrevDirectory(_ slot: Int) -> URL {
         prevSnapshotsDirectory.appendingPathComponent(String(slot))
     }
 
-    static func slotItemDirectory(_ slot: Int, itemIndex: Int) -> URL {
+    public static func slotItemDirectory(_ slot: Int, itemIndex: Int) -> URL {
         slotDirectory(slot).appendingPathComponent("item_\(itemIndex)")
     }
 
-    static var launchAgentDirectory: URL {
+    public static var launchAgentDirectory: URL {
         homeDirectory.appendingPathComponent("Library/LaunchAgents")
     }
 
-    static var launchAgentPlist: URL {
+    public static var launchAgentPlist: URL {
         launchAgentDirectory.appendingPathComponent("com.clipslots.daemon.plist")
     }
 
-    static var binaryPath: String {
+    public static var binaryPath: String {
         return "/usr/local/bin/clipslots"
     }
 
-    static var logFile: URL {
+    public static var logFile: URL {
         URL(fileURLWithPath: "/tmp/clipslots.log")
     }
 
-    static var errorLogFile: URL {
+    public static var errorLogFile: URL {
         URL(fileURLWithPath: "/tmp/clipslots.err")
     }
 
-    static func ensureDirectoryExists(at url: URL) throws {
+    public static func ensureDirectoryExists(at url: URL) throws {
         if !FileManager.default.fileExists(atPath: url.path) {
             try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
         }
     }
 
-    static func ensureAllDirectoriesExist() throws {
+    public static func ensureAllDirectoriesExist() throws {
         try ensureDirectoryExists(at: configDirectory)
         try ensureDirectoryExists(at: dataDirectory)
         try ensureDirectoryExists(at: launchAgentDirectory)

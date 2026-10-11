@@ -61,6 +61,15 @@ jobs:
         run: |
           tar czf "clipslots-${{ steps.version.outputs.VERSION }}-universal.tar.gz" clipslots
 
+      - name: Build menubar app (beta, unsigned)
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          VERSION="$VERSION" ./scripts/build-app.sh --universal --sign - --out app-build
+          lipo -info app-build/ClipSlots.app/Contents/MacOS/ClipSlots
+          # ditto keeps the bundle's symlinks, xattrs and signature intact.
+          ditto -c -k --keepParent app-build/ClipSlots.app "ClipSlots-app-${VERSION}.zip"
+          cp "ClipSlots-app-${VERSION}.zip" ClipSlots-app.zip
+
       - name: Extract changelog section
         id: changelog
         run: |
@@ -114,10 +123,25 @@ jobs:
             **Option C — Download the raw binary**
 
             Download `clipslots-${{ steps.version.outputs.VERSION }}-universal.tar.gz`, extract, copy to `/usr/local/bin`, and run `clipslots permissions`.
+
+            ## Menubar app (beta)
+
+            `ClipSlots-app.zip` is the menubar app: the same slots and hotkeys, plus a popover (⌃⌥V) to browse, copy, paste, swap, lock and peek. It replaces `clipslots start`; the CLI keeps working alongside it.
+
+            It is **not notarized yet**, so macOS will block the first launch:
+
+            1. Unzip and drag **ClipSlots.app** into Applications
+            2. Open it. When macOS says it can't verify the developer, click **Done**
+            3. Go to System Settings → Privacy & Security, scroll down, click **Open Anyway**
+            4. Follow the setup window to turn on Accessibility
+
+            After updating to a newer beta, toggle ClipSlots off and on again under Accessibility (unsigned builds get a new identity each release).
           files: |
             ClipSlots-${{ steps.version.outputs.VERSION }}.pkg
             ClipSlots.pkg
             clipslots-${{ steps.version.outputs.VERSION }}-universal.tar.gz
+            ClipSlots-app-${{ steps.version.outputs.VERSION }}.zip
+            ClipSlots-app.zip
 
       - name: Compute tarball sha256
         id: sha

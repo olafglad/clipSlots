@@ -1,4 +1,5 @@
 import Foundation
+import ClipSlotsCore
 #if canImport(Darwin)
 import Darwin
 #endif

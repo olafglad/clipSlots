@@ -15,6 +15,31 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.15.0] - 2026-10-11
+
+### Added
+- **Menubar app (beta).** `ClipSlots.app` puts the slots in a menubar
+  popover: open it with ⌃⌥V or the clipboard icon, type to filter, ↑↓ to
+  move, ⏎ to copy, ⌘⏎ to paste into the app you came from, space to peek.
+  Each slot shows its label, age, lock state and an image thumbnail.
+  Inline actions cover copy, paste, open, lock, label, clear and undo.
+  Drag one slot onto another to swap (hold ⌥ to copy, drop on an empty
+  slot to move). A first-launch window walks through the Accessibility
+  grant and updates on its own once it's on. Shipped as an unsigned beta
+  `ClipSlots-app.zip` on each release; `make app` / `make app-install`
+  build it locally.
+- **`keybinds.popover`** in `config.toml` (default `ctrl+option+v`, `""`
+  disables) for the popover shortcut. `space` is now a valid key name.
+
+### Changed
+- **The app owns the hotkeys while it runs.** Launching ClipSlots.app
+  stops the CLI's LaunchAgent daemon; `clipslots start`/`restart` decline
+  while the app is up, and `clipslots status` reports
+  "Running (ClipSlots.app)". Every other CLI command works unchanged
+  against the same slots.
+- Shared storage, config, clipboard and hotkey code moved into a
+  `ClipSlotsCore` library used by both the CLI and the app.
+
 ## [1.14.0] - 2026-05-27
 
 ### Added
@@ -328,6 +353,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.15.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.15.0
 [1.14.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.14.0
 [1.13.1]: https://github.com/olafglad/clipSlots/releases/tag/v1.13.1
 [1.13.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.13.0

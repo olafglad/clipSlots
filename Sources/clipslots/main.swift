@@ -1,11 +1,12 @@
 import ArgumentParser
+import ClipSlotsCore
 import Foundation
 
 struct ClipSlots: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "clipslots",
         abstract: "Lightweight clipboard slot manager for macOS",
-        version: "1.14.0",
+        version: "1.15.0",
         subcommands: [
             Save.self,
             Paste.self,

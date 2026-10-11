@@ -1,4 +1,5 @@
 import ApplicationServices
+import ClipSlotsCore
 import ArgumentParser
 import Foundation
 
@@ -37,6 +38,7 @@ struct Status: ParsableCommand {
 
     private struct Report {
         var daemonRunning: Bool
+        var appRunning: Bool
         var daemonPID: Int?
         var daemonUptime: TimeInterval?
         var accessibilityGranted: Bool
@@ -50,7 +52,13 @@ struct Status: ParsableCommand {
     private func gather() -> Report {
         let config = (try? ConfigManager.load()) ?? Config.default
         let clipboard = Clipboard()
-        let (running, pid) = LaunchAgentManager.isRunning()
+        var (running, pid) = LaunchAgentManager.isRunning()
+        // The app owns the hotkeys whenever it runs, so report its PID.
+        let app = MenubarApp.runningInstance()
+        if let app = app {
+            running = true
+            pid = Int(app.processIdentifier)
+        }
 
         let uptime: TimeInterval? = {
             guard running, let pid = pid else { return nil }
@@ -65,6 +73,7 @@ struct Status: ParsableCommand {
 
         return Report(
             daemonRunning: running,
+            appRunning: app != nil,
             daemonPID: pid,
             daemonUptime: uptime,
             accessibilityGranted: AXIsProcessTrusted(),
@@ -88,7 +97,8 @@ struct Status: ParsableCommand {
 
         // Daemon
         lines.append(Style.sectionHeader("Daemon"))
-        lines.append(Style.keyValue("Status:", "\(Style.indicator(on: r.daemonRunning)) \(r.daemonRunning ? "Running" : "Not running")", keyWidth: keyWidth))
+        let statusText = r.appRunning ? "Running (ClipSlots.app)" : (r.daemonRunning ? "Running" : "Not running")
+        lines.append(Style.keyValue("Status:", "\(Style.indicator(on: r.daemonRunning)) \(statusText)", keyWidth: keyWidth))
         if r.daemonRunning, let pid = r.daemonPID {
             lines.append(Style.keyValue("PID:", String(pid), keyWidth: keyWidth))
         }
@@ -116,6 +126,8 @@ struct Status: ParsableCommand {
         lines.append(Style.keyValue("Paste:", r.keybinds.paste, keyWidth: keyWidth))
         let appendDesc = r.keybinds.append.isEmpty ? "off" : r.keybinds.append
         lines.append(Style.keyValue("Append:", appendDesc, keyWidth: keyWidth))
+        let popoverDesc = r.keybinds.popover.isEmpty ? "off" : r.keybinds.popover
+        lines.append(Style.keyValue("Popover:", popoverDesc, keyWidth: keyWidth))
 
         return lines
     }

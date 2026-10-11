@@ -1,17 +1,19 @@
 import AppKit
 
-class Clipboard {
+public class Clipboard {
     private let pasteboard = NSPasteboard.general
 
-    var permissionStatus: PermissionStatus {
+    public init() {}
+
+    public var permissionStatus: PermissionStatus {
         // macOS 15.4+ will expose accessBehavior; for now assume allowed
         return .allowed
     }
 
-    enum PermissionStatus {
+    public enum PermissionStatus {
         case allowed, promptEachTime, denied, unknown
 
-        var description: String {
+        public var description: String {
             switch self {
             case .allowed:        return "Allowed"
             case .promptEachTime: return "Prompt Each Time"
@@ -20,23 +22,23 @@ class Clipboard {
             }
         }
 
-        var isUsable: Bool {
+        public var isUsable: Bool {
             self == .allowed || self == .promptEachTime
         }
     }
 
-    func getCurrentContent() -> String? {
+    public func getCurrentContent() -> String? {
         guard permissionStatus.isUsable else { return nil }
         return pasteboard.string(forType: .string)
     }
 
-    func setContent(_ content: String) -> Bool {
+    public func setContent(_ content: String) -> Bool {
         guard permissionStatus.isUsable else { return false }
         pasteboard.clearContents()
         return pasteboard.setString(content, forType: .string)
     }
 
-    func captureAll() -> SlotContent? {
+    public func captureAll() -> SlotContent? {
         guard permissionStatus.isUsable else { return nil }
         guard let items = pasteboard.pasteboardItems, !items.isEmpty else { return nil }
 
@@ -57,7 +59,7 @@ class Clipboard {
         return SlotContent(items: snapshots)
     }
 
-    func restoreAll(_ content: SlotContent) -> Bool {
+    public func restoreAll(_ content: SlotContent) -> Bool {
         guard permissionStatus.isUsable else { return false }
         pasteboard.clearContents()
 
@@ -72,17 +74,17 @@ class Clipboard {
         return true
     }
 
-    var isEmpty: Bool {
+    public var isEmpty: Bool {
         getCurrentContent()?.isEmpty ?? true
     }
 }
 
-enum ClipboardError: LocalizedError {
+public enum ClipboardError: LocalizedError {
     case permissionDenied
     case emptyClipboard
     case failedToSet
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .permissionDenied:
             return "Pasteboard permission required. Run 'clipslots permissions' for instructions."

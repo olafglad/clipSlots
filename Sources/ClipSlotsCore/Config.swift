@@ -1,16 +1,16 @@
 import Foundation
 import TOMLDecoder
 
-struct Config: Codable {
-    var slots: Int = 5
-    var verbose: Bool = true
-    var expire_after_hours: Int? = nil
-    var feedback: String = "off"
-    var keybinds: Keybinds = Keybinds()
+public struct Config: Codable {
+    public var slots: Int = 5
+    public var verbose: Bool = true
+    public var expire_after_hours: Int? = nil
+    public var feedback: String = "off"
+    public var keybinds: Keybinds = Keybinds()
 
-    init() {}
+    public init() {}
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         // NOTE: every new stored property MUST be added here, not just declared above,
         // or it will silently always read as its default. See Keybinds for the pattern.
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -21,26 +21,30 @@ struct Config: Codable {
         keybinds           = try c.decodeIfPresent(Keybinds.self, forKey: .keybinds)           ?? Keybinds()
     }
 
-    struct Keybinds: Codable {
-        var save: String = "ctrl+option+{n}"
-        var paste: String = "ctrl+{n}"
-        var append: String = ""
-        var append_separator: String = "\n"
+    public struct Keybinds: Codable {
+        public var save: String = "ctrl+option+{n}"
+        public var paste: String = "ctrl+{n}"
+        public var append: String = ""
+        public var append_separator: String = "\n"
+        /// Opens the menubar app's popover. Read only by ClipSlots.app;
+        /// the CLI daemon ignores it. Empty string disables the shortcut.
+        public var popover: String = "ctrl+option+v"
 
-        init() {}
+        public init() {}
 
-        init(from decoder: Decoder) throws {
+        public init(from decoder: Decoder) throws {
             let c = try decoder.container(keyedBy: CodingKeys.self)
             save = try c.decodeIfPresent(String.self, forKey: .save) ?? "ctrl+option+{n}"
             paste = try c.decodeIfPresent(String.self, forKey: .paste) ?? "ctrl+{n}"
             append = try c.decodeIfPresent(String.self, forKey: .append) ?? ""
             append_separator = try c.decodeIfPresent(String.self, forKey: .append_separator) ?? "\n"
+            popover = try c.decodeIfPresent(String.self, forKey: .popover) ?? "ctrl+option+v"
         }
     }
 
-    static var `default`: Config { Config() }
+    public static var `default`: Config { Config() }
 
-    func validate() throws {
+    public func validate() throws {
         guard (1...10).contains(slots) else {
             throw ConfigError.invalidSlotCount(slots)
         }
@@ -54,6 +58,23 @@ struct Config: Codable {
         try validateKeybindPattern(keybinds.paste, type: "paste")
         if !keybinds.append.isEmpty {
             try validateKeybindPattern(keybinds.append, type: "append")
+        }
+        if !keybinds.popover.isEmpty {
+            try validateFixedKeybind(keybinds.popover, type: "popover")
+        }
+    }
+
+    /// Validates a single fixed combo (no `{n}` placeholder), e.g. "ctrl+option+v".
+    private func validateFixedKeybind(_ combo: String, type: String) throws {
+        let parts = combo.split(separator: "+")
+        guard parts.count >= 2, !combo.contains("{n}") else {
+            throw ConfigError.invalidKeybindFormat(type: type, pattern: combo)
+        }
+        let validModifiers = Set(["ctrl", "control", "option", "alt", "cmd", "command", "shift"])
+        for modifier in parts.dropLast().map({ String($0).lowercased() }) {
+            guard validModifiers.contains(modifier) else {
+                throw ConfigError.invalidModifier(modifier: modifier, type: type)
+            }
         }
     }
 
@@ -75,12 +96,12 @@ struct Config: Codable {
         }
     }
 
-    func expandKeybind(_ pattern: String, slot: Int) -> String {
+    public func expandKeybind(_ pattern: String, slot: Int) -> String {
         pattern.replacingOccurrences(of: "{n}", with: String(slot))
     }
 }
 
-enum ConfigError: LocalizedError {
+public enum ConfigError: LocalizedError {
     case fileNotFound
     case invalidFormat(String)
     case invalidSlotCount(Int)
@@ -90,7 +111,7 @@ enum ConfigError: LocalizedError {
     case invalidKeybindFormat(type: String, pattern: String)
     case invalidModifier(modifier: String, type: String)
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .fileNotFound:
             return "Config file not found. Creating default configuration."
@@ -112,7 +133,7 @@ enum ConfigError: LocalizedError {
     }
 }
 
-class ConfigManager {
+public class ConfigManager {
     private static let defaultConfigContent = """
 # ClipSlots Configuration
 
@@ -161,9 +182,15 @@ paste = "ctrl+{n}"
 #
 # append = "ctrl+option+shift+{n}"
 # append_separator = "\\n"
+
+# Optional: shortcut that opens the ClipSlots menubar app's popover.
+# Only used by ClipSlots.app (the CLI ignores it). A single fixed combo,
+# no {n}. Set to "" to disable.
+#
+# popover = "ctrl+option+v"
 """
 
-    static func load() throws -> Config {
+    public static func load() throws -> Config {
         let configURL = Paths.configFile
 
         try Paths.ensureDirectoryExists(at: Paths.configDirectory)
@@ -190,7 +217,7 @@ paste = "ctrl+{n}"
     /// Like `load()` but does not swallow parse/validation errors. Used by
     /// `config validate` so real problems surface with a non-zero exit.
     /// If the file doesn't exist, it's created with defaults (same as `load()`).
-    static func loadStrict() throws -> Config {
+    public static func loadStrict() throws -> Config {
         let configURL = Paths.configFile
 
         try Paths.ensureDirectoryExists(at: Paths.configDirectory)

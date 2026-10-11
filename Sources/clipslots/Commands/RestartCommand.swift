@@ -1,4 +1,5 @@
 import ArgumentParser
+import ClipSlotsCore
 import Foundation
 
 struct Restart: ParsableCommand {
@@ -7,6 +8,11 @@ struct Restart: ParsableCommand {
     )
 
     mutating func run() throws {
+        if MenubarApp.isRunning {
+            print(MenubarApp.takeoverMessage)
+            return
+        }
+
         print("Restarting ClipSlots daemon...")
 
         let (running, _) = LaunchAgentManager.isRunning()

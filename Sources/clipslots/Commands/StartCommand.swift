@@ -1,4 +1,5 @@
 import ArgumentParser
+import ClipSlotsCore
 import Foundation
 
 struct Start: ParsableCommand {
@@ -7,6 +8,11 @@ struct Start: ParsableCommand {
     )
 
     mutating func run() throws {
+        if MenubarApp.isRunning {
+            print(MenubarApp.takeoverMessage)
+            return
+        }
+
         let (running, pid) = LaunchAgentManager.isRunning()
         if running {
             print("ClipSlots daemon already running (PID: \(pid.map(String.init) ?? "unknown"))")
