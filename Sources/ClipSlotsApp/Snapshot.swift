@@ -46,6 +46,22 @@ enum Snapshot {
         }
 
         render(OnboardingView(model: model), to: dir.appendingPathComponent("onboarding.png"))
+
+        // Panel sizing: the window must track the content's natural height.
+        let panel = PanelController(rootView: PanelRootView(model: model))
+        func report(_ label: String) {
+            RunLoop.main.run(until: Date().addingTimeInterval(0.2))
+            panel.fitToContent()
+            print("panel \(label): \(Int(panel.panel.frame.width))x\(Int(panel.panel.frame.height))")
+        }
+        model.select(filled.first?.number ?? 1)
+        panel.show(below: nil)
+        report("full list")
+        model.filter = "zzz-no-match"
+        report("filtered")
+        model.filter = ""
+        report("full again")
+        panel.hide()
         print("snapshot: wrote PNGs to \(dir.path)")
     }
 

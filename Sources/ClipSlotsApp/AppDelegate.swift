@@ -74,18 +74,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func setUpPanel() {
-        var controller: PanelController!
-        controller = PanelController(rootView: PanelRootView(model: model) { size in
-            controller?.contentSizeChanged(size)
-        })
+        let controller = PanelController(rootView: PanelRootView(model: model))
         controller.onHide = { [weak self] in
             self?.model.dragSource = nil
             self?.model.dropTarget = nil
             self?.model.peekSlot = nil
         }
-        model.panelDragChanged = { controller?.dragChanged() }
-        model.panelDragEnded = { controller?.dragEnded() }
-        model.resetPanelPosition = { [weak self] in
+        model.panelDragChanged = { [weak controller] in controller?.dragChanged() }
+        model.panelDragEnded = { [weak controller] in controller?.dragEnded() }
+        model.resetPanelPosition = { [weak self, weak controller] in
             controller?.resetPosition()
             self?.closePanel()
             self?.showPanel()

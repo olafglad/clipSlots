@@ -40,10 +40,16 @@ final class PanelController: NSObject, NSWindowDelegate {
     private var dragStartOrigin: NSPoint?
     private var lastHide = Date.distantPast
 
+    private var fittingSize: () -> NSSize = { .zero }
+
     init<Content: View>(rootView: Content) {
         super.init()
-        let hosting = NSHostingView(rootView: rootView)
-        hosting.sizingOptions = []
+        let hosting = SelfSizingHostingView(rootView: rootView)
+        hosting.onIntrinsicSizeChange = { [weak self] in self?.fitToContent() }
+        fittingSize = { [weak hosting] in
+            hosting?.layoutSubtreeIfNeeded()
+            return hosting?.fittingSize ?? .zero
+        }
         panel.contentView = hosting
         panel.delegate = self
     }
@@ -57,7 +63,9 @@ final class PanelController: NSObject, NSWindowDelegate {
 
     func show(below statusButton: NSStatusBarButton?) {
         let topLeft = savedTopLeft() ?? defaultTopLeft(below: statusButton)
-        place(topLeft: topLeft, size: panel.frame.size)
+        // Measure before showing: SwiftUI may not have laid out the new
+        // state (filter cleared, peek closed) while the panel was hidden.
+        place(topLeft: topLeft, size: measuredSize())
         panel.makeKeyAndOrderFront(nil)
     }
 
@@ -75,11 +83,17 @@ final class PanelController: NSObject, NSWindowDelegate {
 
     // MARK: - Sizing
 
-    /// SwiftUI reports its ideal size; grow or shrink downward from a fixed top edge.
-    func contentSizeChanged(_ size: CGSize) {
-        guard size.width > 0, size.height > 0 else { return }
-        let topLeft = NSPoint(x: panel.frame.minX, y: panel.frame.maxY)
-        place(topLeft: topLeft, size: size)
+    /// Content changed size (row expanded, filter applied, peek opened):
+    /// grow or shrink downward from a fixed top edge.
+    func fitToContent() {
+        let size = measuredSize()
+        guard size != panel.frame.size else { return }
+        place(topLeft: NSPoint(x: panel.frame.minX, y: panel.frame.maxY), size: size)
+    }
+
+    private func measuredSize() -> NSSize {
+        let size = fittingSize()
+        return size.width > 0 && size.height > 0 ? size : panel.frame.size
     }
 
     private func place(topLeft: NSPoint, size: CGSize) {
@@ -141,39 +155,29 @@ final class PanelController: NSObject, NSWindowDelegate {
 
 // MARK: - SwiftUI glue
 
-private struct SizeKey: PreferenceKey {
-    static var defaultValue: CGSize = .zero
-    static func reduce(value: inout CGSize, nextValue: () -> CGSize) { value = nextValue() }
-}
+/// NSHostingView that tells us whenever SwiftUI's ideal size changes, so
+/// the panel can track it. Deferred a runloop turn: resizing the window
+/// from inside SwiftUI's own layout pass is ignored.
+final class SelfSizingHostingView<Content: View>: NSHostingView<Content> {
+    var onIntrinsicSizeChange: (() -> Void)?
 
-extension View {
-    /// Reports this view's laid-out size whenever it changes.
-    func onSizeChange(_ action: @escaping (CGSize) -> Void) -> some View {
-        background(GeometryReader { proxy in
-            Color.clear.preference(key: SizeKey.self, value: proxy.size)
-        })
-        .onPreferenceChange(SizeKey.self, perform: action)
+    override func invalidateIntrinsicContentSize() {
+        super.invalidateIntrinsicContentSize()
+        DispatchQueue.main.async { [weak self] in self?.onIntrinsicSizeChange?() }
     }
 }
 
-/// Root of the panel: the slot UI at its ideal height, rounded and pinned
-/// to the top so the window can resize around it.
+/// Root of the panel: the slot UI at its natural size, with rounded corners.
 struct PanelRootView: View {
     @ObservedObject var model: SlotsModel
-    let onSize: (CGSize) -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
-            PopoverView(model: model)
-                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(Theme.text.opacity(0.12), lineWidth: 1)
-                )
-                .fixedSize(horizontal: true, vertical: true)
-                .onSizeChange(onSize)
-            Spacer(minLength: 0)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        PopoverView(model: model)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .strokeBorder(Theme.text.opacity(0.12), lineWidth: 1)
+            )
+            .fixedSize()
     }
 }
