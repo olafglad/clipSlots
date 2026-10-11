@@ -173,12 +173,7 @@ struct SlotListView: View {
                 .foregroundColor(Theme.text)
                 .focused($filterFocused)
                 .accessibilityLabel("Filter slots")
-            Text("⌘F")
-                .font(Theme.mono(11))
-                .foregroundColor(Theme.textTertiary)
-                .padding(.horizontal, 5)
-                .padding(.vertical, 1)
-                .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Theme.borderStrong, lineWidth: 1))
+            KeyCombo(["⌘", "F"])
         }
         .padding(.horizontal, 12)
         .frame(height: 38)
@@ -214,10 +209,17 @@ struct SlotListView: View {
         let selectedItem = model.slot(model.selected)
         let canUndo = selectedItem?.canUndo ?? false
         return HStack(spacing: 12) {
-            Text("\(KeybindText.pretty(model.keybinds.paste, slots: model.slotCount)) paste · \(KeybindText.pretty(model.keybinds.save, slots: model.slotCount)) save")
-                .font(Theme.mono(11))
-                .foregroundColor(Theme.textSecondary)
-                .lineLimit(1)
+            HStack(spacing: 6) {
+                KeyCombo(pattern: model.keybinds.paste, slots: model.slotCount)
+                Text("paste")
+                Text("·").foregroundColor(Theme.textTertiary)
+                KeyCombo(pattern: model.keybinds.save, slots: model.slotCount)
+                Text("save")
+            }
+            .font(Theme.mono(11))
+            .foregroundColor(Theme.textSecondary)
+            .lineLimit(1)
+            .fixedSize()
             Spacer(minLength: 0)
             Button {
                 model.undo(model.selected)
@@ -226,7 +228,7 @@ struct SlotListView: View {
                     Image(systemName: "arrow.uturn.backward")
                         .font(.system(size: 11, weight: .semibold))
                     Text("undo \(model.selected)")
-                    Text("⌘Z").foregroundColor(Theme.textTertiary)
+                    KeyCombo(["⌘", "Z"]).opacity(canUndo ? 1 : 0.6)
                 }
                 .font(Theme.mono(11))
                 .foregroundColor(canUndo ? Theme.text.opacity(0.85) : Theme.textTertiary)
@@ -329,11 +331,22 @@ struct SlotRowView: View {
                         .foregroundColor(Theme.mint)
                         .lineLimit(1)
                 }
-                Text(item.isEmpty ? "empty · \(KeybindText.pretty(model.engine.config.expandKeybind(model.keybinds.save, slot: item.number), slots: 1)) saves here" : item.summary)
+                if item.isEmpty {
+                    HStack(spacing: 6) {
+                        Text("empty ·")
+                        KeyCombo(pattern: model.engine.config.expandKeybind(model.keybinds.save, slot: item.number), slots: 1, compact: true)
+                        Text("saves here")
+                    }
                     .font(Theme.mono(12.5))
                     .foregroundColor(summaryColor)
                     .lineLimit(1)
-                    .truncationMode(.tail)
+                } else {
+                    Text(item.summary)
+                        .font(Theme.mono(12.5))
+                        .foregroundColor(summaryColor)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                }
             }
             Spacer(minLength: 0)
             if isDropTarget {

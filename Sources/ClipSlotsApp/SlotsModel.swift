@@ -247,10 +247,8 @@ final class SlotsModel: ObservableObject {
             show(.init(text: "couldn't write to the clipboard", kind: .error))
             return
         }
-        show(.init(text: "copied slot \(n)", kind: .success))
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) { [weak self] in
-            self?.closePopover()
-        }
+        closePopover()
+        CursorHUD.shared.flashCheckmark()
     }
 
     func paste(_ n: Int) {

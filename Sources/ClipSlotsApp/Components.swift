@@ -72,8 +72,9 @@ struct ActionButton: View {
                         .fixedSize()
                 }
                 if let hint = hint {
+                    // System font: the ⏎ glyph in JetBrains Mono is cramped.
                     Text(hint)
-                        .font(Theme.mono(12))
+                        .font(.system(size: 11, weight: .medium))
                         .opacity(0.75)
                 }
             }
@@ -235,5 +236,84 @@ struct FlowLayout: Layout {
             rows[rows.count - 1] = row
         }
         return rows
+    }
+}
+
+/// A shortcut drawn as separate key caps: [⌃][⌥][1–9]. Modifier glyphs use
+/// the system font (JetBrains Mono's ⌃⌥⌘ are small and hard to read);
+/// letters and digits stay monospaced.
+struct KeyCombo: View {
+    let keys: [String]
+    var compact = false
+
+    init(_ keys: [String], compact: Bool = false) {
+        self.keys = keys
+        self.compact = compact
+    }
+
+    /// From a config pattern like "ctrl+option+{n}".
+    init(pattern: String, slots: Int, compact: Bool = false) {
+        self.init(KeyCombo.keys(for: pattern, slots: slots), compact: compact)
+    }
+
+    var body: some View {
+        HStack(spacing: 3) {
+            ForEach(Array(keys.enumerated()), id: \.offset) { _, key in
+                KeyCap(key: key, compact: compact)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(KeyCombo.spoken(keys))
+    }
+
+    static let modifierGlyphs: Set<String> = ["⌃", "⌥", "⇧", "⌘", "⏎", "⌫", "⎋"]
+
+    static func keys(for pattern: String, slots: Int) -> [String] {
+        pattern.split(separator: "+").map { part -> String in
+            switch part.lowercased() {
+            case "ctrl", "control": return "⌃"
+            case "option", "alt":   return "⌥"
+            case "shift":           return "⇧"
+            case "cmd", "command":  return "⌘"
+            case "{n}":             return slots > 1 ? "1–\(min(slots, 9))" : "1"
+            case "space":           return "Space"
+            default:                return part.uppercased()
+            }
+        }
+    }
+
+    static func spoken(_ keys: [String]) -> String {
+        keys.map { key in
+            switch key {
+            case "⌃": return "Control"
+            case "⌥": return "Option"
+            case "⇧": return "Shift"
+            case "⌘": return "Command"
+            case "⏎": return "Return"
+            default:  return key
+            }
+        }.joined(separator: " ")
+    }
+}
+
+private struct KeyCap: View {
+    let key: String
+    let compact: Bool
+
+    var body: some View {
+        Group {
+            if KeyCombo.modifierGlyphs.contains(key) {
+                Text(key).font(.system(size: compact ? 10 : 11, weight: .medium))
+            } else {
+                Text(key).font(Theme.mono(compact ? 10 : 11, .medium))
+            }
+        }
+        .foregroundColor(Theme.text.opacity(0.78))
+        .lineLimit(1)
+        .fixedSize()
+        .padding(.horizontal, 4)
+        .frame(minWidth: compact ? 16 : 18, minHeight: compact ? 16 : 18)
+        .background(RoundedRectangle(cornerRadius: 4).fill(Theme.text.opacity(0.07)))
+        .overlay(RoundedRectangle(cornerRadius: 4).strokeBorder(Theme.text.opacity(0.18), lineWidth: 1))
     }
 }

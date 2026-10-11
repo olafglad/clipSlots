@@ -283,6 +283,11 @@ public class SlotStorage {
         if isSlotEmpty(a) { throw SlotStorageError.slotEmpty(a) }
         if isSlotEmpty(b) { throw SlotStorageError.slotEmpty(b) }
 
+        // Ages belong to the content, not the slot: carry each side's
+        // saved-at time across so a swap doesn't look like a fresh save.
+        let savedA = savedAt(a)
+        let savedB = savedAt(b)
+
         // Snapshot both sides into prev so each slot can be `undo`'d
         // independently back to its pre-swap content.
         try snapshotCurrentAsPrev(slotNumber: a)
@@ -319,6 +324,8 @@ public class SlotStorage {
             throw error
         }
 
+        setSavedAt(a, savedB)
+        setSavedAt(b, savedA)
         try updateManifest()
     }
 
@@ -338,7 +345,24 @@ public class SlotStorage {
         // setSlot handles snapshotCurrentAsPrev for dst and updates
         // the manifest. It also re-checks the lock on dst, which is
         // fine — we already checked above.
+        let saved = savedAt(src)
         try setSlot(dst, content: content)
+        // The copy is the same item, so it keeps the source's age.
+        if saved != nil {
+            setSavedAt(dst, saved)
+            try updateManifest()
+        }
+    }
+
+    /// When the slot's current content was saved: the slot directory's
+    /// mtime (also what `updateManifest` and the expiry sweep read).
+    public func savedAt(_ slotNumber: Int) -> Date? {
+        (try? fm.attributesOfItem(atPath: Paths.slotDirectory(slotNumber).path)[.modificationDate]) as? Date
+    }
+
+    private func setSavedAt(_ slotNumber: Int, _ date: Date?) {
+        guard let date = date else { return }
+        try? fm.setAttributes([.modificationDate: date], ofItemAtPath: Paths.slotDirectory(slotNumber).path)
     }
 
     /// Captures the current on-disk slot dir as the prev snapshot.

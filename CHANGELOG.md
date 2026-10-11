@@ -39,6 +39,10 @@ the release ships with only install instructions.
   against the same slots.
 - Shared storage, config, clipboard and hotkey code moved into a
   `ClipSlotsCore` library used by both the CLI and the app.
+- **Ages follow the item, not the slot.** `swap` and `copy` (and the
+  app's drag-to-move) keep each item's original saved-at time, so `list`
+  ages and the `expire_after_hours` clock no longer reset when content
+  moves between slots.
 
 ## [1.14.0] - 2026-05-27
 
