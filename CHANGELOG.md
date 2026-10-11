@@ -22,7 +22,9 @@ the release ships with only install instructions.
   popover: open it with ⌃⌥V or the clipboard icon, type to filter, ↑↓ to
   move, ⏎ to copy, ⌘⏎ to paste into the app you came from, space to peek.
   Each slot shows its label, age, lock state and an image thumbnail.
-  Inline actions cover copy, paste, open, lock, label, clear and undo.
+  One click on a row's type tile copies it (or, on an empty slot, saves
+  the clipboard there); the selected row adds paste, open, lock, label,
+  clear and undo.
   Drag one slot onto another to swap (hold ⌥ to copy, drop on an empty
   slot to move). A first-launch window walks through the Accessibility
   grant and updates on its own once it's on. Shipped as an unsigned beta

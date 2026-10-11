@@ -382,22 +382,15 @@ struct SlotRowView: View {
         return Theme.text
     }
 
-    @ViewBuilder
+    /// The type tile doubles as the row's one-click action: copy for a
+    /// filled slot, save-clipboard-here for an empty one. Hover reveals it.
     private var thumbnail: some View {
-        if item.kind == .image, let image = item.image {
-            Image(nsImage: image)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 34, height: 34)
-                .background(Theme.thumb)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
-                .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Theme.border, lineWidth: 1))
-        } else {
-            Image(systemName: item.kind.symbol)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundColor(item.isEmpty ? Theme.text.opacity(0.45) : Theme.text.opacity(0.75))
-                .frame(width: 34, height: 34)
-                .background(RoundedRectangle(cornerRadius: 6).fill(Theme.surface))
+        RowTileButton(item: item) {
+            if item.isEmpty {
+                model.saveClipboard(into: item.number)
+            } else {
+                model.copy(item.number)
+            }
         }
     }
 
@@ -411,10 +404,7 @@ struct SlotRowView: View {
             }
         } else {
             FlowLayout {
-                ActionButton(title: "Copy", symbol: "doc.on.doc", hint: "⏎", primary: true) {
-                    model.copy(item.number)
-                }
-                ActionButton(title: "Paste", symbol: "doc.on.clipboard") {
+                ActionButton(title: "Paste", symbol: "doc.on.clipboard", primary: true) {
                     model.paste(item.number)
                 }
                 if let openLabel = item.openLabel {
@@ -481,5 +471,55 @@ struct SlotDropDelegate: DropDelegate {
         guard let source = model.dragSource else { return false }
         model.drop(from: source, onto: target, copy: NSEvent.modifierFlags.contains(.option))
         return true
+    }
+}
+
+/// 34×34 tile at the start of each row: shows the content type (or the
+/// image thumbnail); on hover it turns into the copy button (purple), or
+/// for an empty slot the save-clipboard-here button (mint).
+struct RowTileButton: View {
+    let item: SlotItem
+    let action: () -> Void
+    @State private var hovering = false
+
+    private var hoverTint: Color { item.isEmpty ? Theme.mint : Theme.accent }
+    private var hoverSymbol: String { item.isEmpty ? "arrow.down.to.line" : "doc.on.doc" }
+
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                if item.kind == .image, let image = item.image {
+                    Image(nsImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 34, height: 34)
+                        .background(Theme.thumb)
+                } else {
+                    RoundedRectangle(cornerRadius: 6).fill(Theme.surface)
+                    Image(systemName: item.kind.symbol)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(item.isEmpty ? Theme.text.opacity(0.45) : Theme.text.opacity(0.75))
+                }
+                if hovering {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(item.kind == .image ? hoverTint.opacity(0.85) : hoverTint)
+                    Image(systemName: hoverSymbol)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(item.isEmpty ? Theme.background : .white)
+                }
+            }
+            .frame(width: 34, height: 34)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .strokeBorder(item.kind == .image && !hovering ? Theme.border : Color.clear, lineWidth: 1)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .animation(.easeOut(duration: 0.12), value: hovering)
+        .help(item.isEmpty ? "Save clipboard to slot \(item.number)" : "Copy slot \(item.number) (⏎)")
+        .accessibilityLabel(item.isEmpty ? "Save clipboard to slot \(item.number)" : "Copy slot \(item.number)")
     }
 }
