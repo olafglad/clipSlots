@@ -44,6 +44,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         model.pasteIntoPreviousApp = { [weak self] n in self?.paste(slot: n) }
         model.showOnboarding = { [weak self] in self?.showOnboarding() }
 
+        Feedback.visualHandler = { CursorHUD.shared.flashCheckmark() }
         engine.onConfigReload = { [weak self] in self?.model.reload() }
         engine.onPopoverHotkey = { [weak self] in self?.togglePanel() }
         engine.start()

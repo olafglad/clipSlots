@@ -384,10 +384,9 @@ final class SlotsModel: ObservableObject {
         } else if storage.isSlotEmpty(dst) {
             ok = perform {
                 if storage.isLocked(src) { throw SlotStorageError.slotLocked(src) }
-                let label = storage.getLabel(src)
+                // copy carries content, age and label; then empty the source.
                 try storage.copy(from: src, to: dst)
                 try storage.clearSlot(src)
-                if let label = label { try storage.setLabel(dst, label: label) }
             }
             if ok { show(.init(text: "moved \(src) → \(dst)", kind: .success)) }
         } else {

@@ -326,6 +326,14 @@ public class SlotStorage {
 
         setSavedAt(a, savedB)
         setSavedAt(b, savedA)
+
+        // Labels describe the content, so they travel with it too.
+        var labels = loadLabels()
+        let labelA = labels[String(a)]
+        labels[String(a)] = labels[String(b)]
+        labels[String(b)] = labelA
+        try writeLabels(labels)
+
         try updateManifest()
     }
 
@@ -347,11 +355,13 @@ public class SlotStorage {
         // fine — we already checked above.
         let saved = savedAt(src)
         try setSlot(dst, content: content)
-        // The copy is the same item, so it keeps the source's age.
-        if saved != nil {
-            setSavedAt(dst, saved)
-            try updateManifest()
-        }
+        // The copy is the same item, so it keeps the source's age and label
+        // (dst's old label described content that is now gone).
+        setSavedAt(dst, saved)
+        var labels = loadLabels()
+        labels[String(dst)] = labels[String(src)]
+        try writeLabels(labels)
+        try updateManifest()
     }
 
     /// When the slot's current content was saved: the slot directory's

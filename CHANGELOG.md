@@ -28,6 +28,9 @@ the release ships with only install instructions.
   grant and updates on its own once it's on. Shipped as an unsigned beta
   `ClipSlots-app.zip` on each release; `make app` / `make app-install`
   build it locally.
+- **`feedback = "visual"`** (and `"both"`): a purple checkmark next to the
+  pointer confirms hotkey saves and appends (ClipSlots.app only). The
+  app's Copy button always shows it.
 - **`keybinds.popover`** in `config.toml` (default `ctrl+option+v`, `""`
   disables) for the popover shortcut. `space` is now a valid key name.
 
@@ -39,10 +42,12 @@ the release ships with only install instructions.
   against the same slots.
 - Shared storage, config, clipboard and hotkey code moved into a
   `ClipSlotsCore` library used by both the CLI and the app.
-- **Ages follow the item, not the slot.** `swap` and `copy` (and the
-  app's drag-to-move) keep each item's original saved-at time, so `list`
-  ages and the `expire_after_hours` clock no longer reset when content
-  moves between slots.
+- **Ages and labels follow the item, not the slot.** `swap` and `copy`
+  (and the app's drag-to-move) keep each item's original saved-at time and
+  carry its label along: `swap` trades labels, `copy` gives the
+  destination the source's label. `list` ages and the `expire_after_hours`
+  clock no longer reset when content moves. Saving new content into a
+  labeled slot still keeps the slot's label.
 
 ## [1.14.0] - 2026-05-27
 

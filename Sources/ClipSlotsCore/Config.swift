@@ -51,7 +51,7 @@ public struct Config: Codable {
         if let hours = expire_after_hours, hours <= 0 {
             throw ConfigError.invalidExpireHours(hours)
         }
-        guard ["off", "sound"].contains(feedback) else {
+        guard ["off", "sound", "visual", "both"].contains(feedback) else {
             throw ConfigError.invalidFeedback(feedback)
         }
         try validateKeybindPattern(keybinds.save, type: "save")
@@ -122,7 +122,7 @@ public enum ConfigError: LocalizedError {
         case .invalidExpireHours(let hours):
             return "Invalid expire_after_hours: \(hours). Must be a positive integer (or omit the key to disable)."
         case .invalidFeedback(let value):
-            return "Invalid feedback: \"\(value)\". Must be \"off\" or \"sound\"."
+            return "Invalid feedback: \"\(value)\". Must be \"off\", \"sound\", \"visual\" or \"both\"."
         case .missingPlaceholder(let type, let pattern):
             return "Invalid keybind for \(type): \"\(pattern)\" missing {n} placeholder."
         case .invalidKeybindFormat(let type, let pattern):
@@ -151,10 +151,12 @@ verbose = true
 #
 # expire_after_hours = 24
 
-# Optional: play a short system sound on successful save/paste/append from
-# a hotkey. Useful confirmation that the hotkey fired. Off by default.
-# Valid values: "off", "sound". Sound feedback never fires from the CLI
-# (`clipslots save` / `paste`), only from daemon hotkeys.
+# Optional: confirm that a hotkey fired. Off by default.
+#   "sound"  - short system sound on save/paste/append
+#   "visual" - purple checkmark next to the pointer on save/append
+#              (ClipSlots.app only; the CLI daemon has no UI)
+#   "both"   - sound and checkmark
+# Never fires from CLI commands (`clipslots save` / `paste`), only hotkeys.
 #
 # feedback = "sound"
 
