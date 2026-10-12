@@ -1,4 +1,5 @@
 import ArgumentParser
+import ClipSlotsCore
 import Foundation
 
 struct Paste: ParsableCommand {

@@ -1,23 +1,36 @@
 import Foundation
 import AppKit
 
-struct PasteboardRepresentation {
-    let typeString: String
-    let data: Data
+public struct PasteboardRepresentation {
+    public let typeString: String
+    public let data: Data
+
+    public init(typeString: String, data: Data) {
+        self.typeString = typeString
+        self.data = data
+    }
 }
 
-struct PasteboardItemSnapshot {
-    let representations: [PasteboardRepresentation]
+public struct PasteboardItemSnapshot {
+    public let representations: [PasteboardRepresentation]
+
+    public init(representations: [PasteboardRepresentation]) {
+        self.representations = representations
+    }
 }
 
-struct SlotContent {
-    let items: [PasteboardItemSnapshot]
+public struct SlotContent {
+    public let items: [PasteboardItemSnapshot]
 
-    var isEmpty: Bool {
+    public init(items: [PasteboardItemSnapshot]) {
+        self.items = items
+    }
+
+    public var isEmpty: Bool {
         items.isEmpty || items.allSatisfy { $0.representations.isEmpty }
     }
 
-    var textPreview: String? {
+    public var textPreview: String? {
         for item in items {
             for rep in item.representations {
                 if rep.typeString == NSPasteboard.PasteboardType.string.rawValue,
@@ -29,7 +42,7 @@ struct SlotContent {
         return nil
     }
 
-    var contentDescription: String {
+    public var contentDescription: String {
         let allTypes = items.flatMap { $0.representations.map { $0.typeString } }
 
         if allTypes.contains("public.file-url") {
@@ -92,26 +105,26 @@ struct SlotContent {
     }
 }
 
-struct ManifestEntry: Codable {
-    let slot: Int
-    let description: String
-    let types: [String]
-    let totalBytes: Int
-    let itemCount: Int
-    let updatedAt: String
-    let label: String?
-    let locked: Bool?
+public struct ManifestEntry: Codable {
+    public let slot: Int
+    public let description: String
+    public let types: [String]
+    public let totalBytes: Int
+    public let itemCount: Int
+    public let updatedAt: String
+    public let label: String?
+    public let locked: Bool?
 }
 
-struct Manifest: Codable {
-    var version: Int?
-    var entries: [ManifestEntry] = []
+public struct Manifest: Codable {
+    public var version: Int?
+    public var entries: [ManifestEntry] = []
 }
 
 extension Manifest {
     /// Current manifest schema version. Bump when adding fields that require migration.
-    static let currentVersion: Int = 1
+    public static let currentVersion: Int = 1
 
     /// Resolved version: nil-decoded manifests are treated as v1.
-    var resolvedVersion: Int { version ?? 1 }
+    public var resolvedVersion: Int { version ?? 1 }
 }

@@ -1,4 +1,5 @@
 import ArgumentParser
+import ClipSlotsCore
 import Foundation
 import AppKit
 

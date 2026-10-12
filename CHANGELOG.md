@@ -15,6 +15,42 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.15.0] - 2026-10-12
+
+### Added
+- **Menubar app (beta).** `ClipSlots.app` puts the slots in a menubar
+  popover: open it with ⌃⌥V or the clipboard icon, type to filter, ↑↓ to
+  move, ⏎ to copy, ⌘⏎ to paste into the app you came from, space to peek.
+  Each slot shows its label, age, lock state and an image thumbnail.
+  One click on a row's type tile copies it (or, on an empty slot, saves
+  the clipboard there); the selected row adds paste, open, lock, label,
+  clear and undo.
+  Drag one slot onto another to swap (hold ⌥ to copy, drop on an empty
+  slot to move). A first-launch window walks through the Accessibility
+  grant and updates on its own once it's on. Shipped as an unsigned beta
+  `ClipSlots-app.zip` on each release; `make app` / `make app-install`
+  build it locally.
+- **`feedback = "visual"`** (and `"both"`): a purple checkmark next to the
+  pointer confirms hotkey saves and appends (ClipSlots.app only). The
+  app's Copy button always shows it.
+- **`keybinds.popover`** in `config.toml` (default `ctrl+option+v`, `""`
+  disables) for the popover shortcut. `space` is now a valid key name.
+
+### Changed
+- **The app owns the hotkeys while it runs.** Launching ClipSlots.app
+  stops the CLI's LaunchAgent daemon; `clipslots start`/`restart` decline
+  while the app is up, and `clipslots status` reports
+  "Running (ClipSlots.app)". Every other CLI command works unchanged
+  against the same slots.
+- Shared storage, config, clipboard and hotkey code moved into a
+  `ClipSlotsCore` library used by both the CLI and the app.
+- **Ages and labels follow the item, not the slot.** `swap` and `copy`
+  (and the app's drag-to-move) keep each item's original saved-at time and
+  carry its label along: `swap` trades labels, `copy` gives the
+  destination the source's label. `list` ages and the `expire_after_hours`
+  clock no longer reset when content moves. Saving new content into a
+  labeled slot still keeps the slot's label.
+
 ## [1.14.0] - 2026-05-27
 
 ### Added
@@ -328,6 +364,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.15.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.15.0
 [1.14.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.14.0
 [1.13.1]: https://github.com/olafglad/clipSlots/releases/tag/v1.13.1
 [1.13.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.13.0

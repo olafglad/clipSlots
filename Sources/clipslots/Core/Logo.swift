@@ -1,4 +1,5 @@
 import Foundation
+import ClipSlotsCore
 
 /// Clipboard logo shown next to the fastfetch-style `status` output.
 /// Uses single-width BMP box-drawing chars so `Style.visibleWidth` stays

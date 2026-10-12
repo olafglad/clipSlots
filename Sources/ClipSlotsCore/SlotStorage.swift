@@ -1,12 +1,12 @@
 import Foundation
 
-enum SlotStorageError: Error, LocalizedError {
+public enum SlotStorageError: Error, LocalizedError {
     case slotLocked(Int)
     case noUndoAvailable(Int)
     case slotEmpty(Int)
     case sameSlot
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .slotLocked(let n):
             return "Slot \(n) is locked. Run `clipslots unlock \(n)` first."
@@ -20,11 +20,11 @@ enum SlotStorageError: Error, LocalizedError {
     }
 }
 
-class SlotStorage {
+public class SlotStorage {
     private let slotCount: Int
     private let fm = FileManager.default
 
-    init(slotCount: Int) throws {
+    public init(slotCount: Int) throws {
         self.slotCount = slotCount
         try Paths.ensureDirectoryExists(at: Paths.slotsDirectory)
         cleanupTempDirectories()
@@ -34,12 +34,12 @@ class SlotStorage {
     // MARK: - Labels
 
     /// Returns the label for a slot, or nil if none set.
-    func getLabel(_ slotNumber: Int) -> String? {
+    public func getLabel(_ slotNumber: Int) -> String? {
         loadLabels()[String(slotNumber)]
     }
 
     /// Sets (or clears, when label is nil/empty) the label for a slot.
-    func setLabel(_ slotNumber: Int, label: String?) throws {
+    public func setLabel(_ slotNumber: Int, label: String?) throws {
         var labels = loadLabels()
         if let label = label, !label.isEmpty {
             labels[String(slotNumber)] = label
@@ -72,17 +72,17 @@ class SlotStorage {
     // MARK: - Locks
 
     /// Returns true when the slot is currently locked.
-    func isLocked(_ slotNumber: Int) -> Bool {
+    public func isLocked(_ slotNumber: Int) -> Bool {
         loadLocks().contains(slotNumber)
     }
 
     /// Returns the set of currently locked slot numbers.
-    func lockedSlots() -> Set<Int> {
+    public func lockedSlots() -> Set<Int> {
         loadLocks()
     }
 
     /// Locks or unlocks a slot.
-    func setLocked(_ slotNumber: Int, locked: Bool) throws {
+    public func setLocked(_ slotNumber: Int, locked: Bool) throws {
         var locks = loadLocks()
         if locked {
             locks.insert(slotNumber)
@@ -115,7 +115,7 @@ class SlotStorage {
     /// (file absent). The age basis for `clearExpired` uses
     /// `max(slot_mtime, enabledAt)` so pre-existing stale slots get a
     /// fresh grace period equal to the TTL itself on first enable.
-    func expiryEnabledAt() -> Date? {
+    public func expiryEnabledAt() -> Date? {
         guard let data = try? Data(contentsOf: Paths.expiryStateFile),
               let dict = try? JSONDecoder().decode([String: String].self, from: data),
               let iso = dict["enabledAt"],
@@ -128,7 +128,7 @@ class SlotStorage {
     /// now). Idempotent: if already marked, the timestamp is preserved.
     /// Returns the persisted timestamp.
     @discardableResult
-    func markExpiryEnabled(at: Date = Date()) throws -> Date {
+    public func markExpiryEnabled(at: Date = Date()) throws -> Date {
         if let existing = expiryEnabledAt() { return existing }
         let iso = ISO8601DateFormatter().string(from: at)
         let data = try JSONEncoder().encode(["enabledAt": iso])
@@ -138,7 +138,7 @@ class SlotStorage {
 
     /// Clears the persisted expiry-enabled marker. Called when the user
     /// disables the feature so the next enable earns a fresh grace period.
-    func clearExpiryEnabled() throws {
+    public func clearExpiryEnabled() throws {
         if fm.fileExists(atPath: Paths.expiryStateFile.path) {
             try fm.removeItem(at: Paths.expiryStateFile)
         }
@@ -146,7 +146,7 @@ class SlotStorage {
 
     // MARK: - Public API
 
-    func getSlot(_ slotNumber: Int) -> SlotContent? {
+    public func getSlot(_ slotNumber: Int) -> SlotContent? {
         let slotDir = Paths.slotDirectory(slotNumber)
         guard fm.fileExists(atPath: slotDir.path) else { return nil }
 
@@ -178,7 +178,7 @@ class SlotStorage {
         return SlotContent(items: items)
     }
 
-    func setSlot(_ slotNumber: Int, content: SlotContent) throws {
+    public func setSlot(_ slotNumber: Int, content: SlotContent) throws {
         if isLocked(slotNumber) {
             throw SlotStorageError.slotLocked(slotNumber)
         }
@@ -222,7 +222,7 @@ class SlotStorage {
     // MARK: - Undo (one level)
 
     /// Returns true if there is a previous-content snapshot for this slot.
-    func hasPrev(_ slotNumber: Int) -> Bool {
+    public func hasPrev(_ slotNumber: Int) -> Bool {
         fm.fileExists(atPath: Paths.slotPrevDirectory(slotNumber).path)
     }
 
@@ -231,7 +231,7 @@ class SlotStorage {
     /// `slotLocked` on a locked slot (locks are the hard guarantee;
     /// `undo` must not silently bypass them) and `noUndoAvailable` when
     /// no prev snapshot exists.
-    func undo(_ slotNumber: Int) throws {
+    public func undo(_ slotNumber: Int) throws {
         if isLocked(slotNumber) {
             throw SlotStorageError.slotLocked(slotNumber)
         }
@@ -276,12 +276,17 @@ class SlotStorage {
     /// reversible per-slot. Throws `sameSlot` when `a == b`,
     /// `slotEmpty` if either side has no content, and `slotLocked` if
     /// either side is locked.
-    func swap(_ a: Int, _ b: Int) throws {
+    public func swap(_ a: Int, _ b: Int) throws {
         guard a != b else { throw SlotStorageError.sameSlot }
         if isLocked(a) { throw SlotStorageError.slotLocked(a) }
         if isLocked(b) { throw SlotStorageError.slotLocked(b) }
         if isSlotEmpty(a) { throw SlotStorageError.slotEmpty(a) }
         if isSlotEmpty(b) { throw SlotStorageError.slotEmpty(b) }
+
+        // Ages belong to the content, not the slot: carry each side's
+        // saved-at time across so a swap doesn't look like a fresh save.
+        let savedA = savedAt(a)
+        let savedB = savedAt(b)
 
         // Snapshot both sides into prev so each slot can be `undo`'d
         // independently back to its pre-swap content.
@@ -319,6 +324,16 @@ class SlotStorage {
             throw error
         }
 
+        setSavedAt(a, savedB)
+        setSavedAt(b, savedA)
+
+        // Labels describe the content, so they travel with it too.
+        var labels = loadLabels()
+        let labelA = labels[String(a)]
+        labels[String(a)] = labels[String(b)]
+        labels[String(b)] = labelA
+        try writeLabels(labels)
+
         try updateManifest()
     }
 
@@ -328,7 +343,7 @@ class SlotStorage {
     /// Throws `sameSlot`, `slotEmpty(src)` when src is empty, and
     /// `slotLocked(dst)` when dst is locked. Source locks do not
     /// block a copy (read-only on the source side).
-    func copy(from src: Int, to dst: Int) throws {
+    public func copy(from src: Int, to dst: Int) throws {
         guard src != dst else { throw SlotStorageError.sameSlot }
         if isLocked(dst) { throw SlotStorageError.slotLocked(dst) }
         if isSlotEmpty(src) { throw SlotStorageError.slotEmpty(src) }
@@ -338,7 +353,26 @@ class SlotStorage {
         // setSlot handles snapshotCurrentAsPrev for dst and updates
         // the manifest. It also re-checks the lock on dst, which is
         // fine — we already checked above.
+        let saved = savedAt(src)
         try setSlot(dst, content: content)
+        // The copy is the same item, so it keeps the source's age and label
+        // (dst's old label described content that is now gone).
+        setSavedAt(dst, saved)
+        var labels = loadLabels()
+        labels[String(dst)] = labels[String(src)]
+        try writeLabels(labels)
+        try updateManifest()
+    }
+
+    /// When the slot's current content was saved: the slot directory's
+    /// mtime (also what `updateManifest` and the expiry sweep read).
+    public func savedAt(_ slotNumber: Int) -> Date? {
+        (try? fm.attributesOfItem(atPath: Paths.slotDirectory(slotNumber).path)[.modificationDate]) as? Date
+    }
+
+    private func setSavedAt(_ slotNumber: Int, _ date: Date?) {
+        guard let date = date else { return }
+        try? fm.setAttributes([.modificationDate: date], ofItemAtPath: Paths.slotDirectory(slotNumber).path)
     }
 
     /// Captures the current on-disk slot dir as the prev snapshot.
@@ -368,7 +402,7 @@ class SlotStorage {
         }
     }
 
-    func clearSlot(_ slotNumber: Int) throws {
+    public func clearSlot(_ slotNumber: Int) throws {
         if isLocked(slotNumber) {
             throw SlotStorageError.slotLocked(slotNumber)
         }
@@ -387,7 +421,7 @@ class SlotStorage {
 
     /// Clears every slot, optionally skipping locked slots.
     /// When `respectLocks` is false, locks themselves are also wiped.
-    func clearAll(respectLocks: Bool) throws {
+    public func clearAll(respectLocks: Bool) throws {
         let locks = loadLocks()
         var labels = loadLabels()
         for i in 1...slotCount {
@@ -408,12 +442,12 @@ class SlotStorage {
         try updateManifest()
     }
 
-    func isSlotEmpty(_ slotNumber: Int) -> Bool {
+    public func isSlotEmpty(_ slotNumber: Int) -> Bool {
         let slotDir = Paths.slotDirectory(slotNumber)
         return !fm.fileExists(atPath: slotDir.path)
     }
 
-    func getAllSlots() -> [Int: SlotContent?] {
+    public func getAllSlots() -> [Int: SlotContent?] {
         var result: [Int: SlotContent?] = [:]
         for i in 1...slotCount {
             result[i] = getSlot(i)
@@ -422,7 +456,7 @@ class SlotStorage {
     }
 
     /// Forces a rebuild of the manifest cache from on-disk slot state.
-    func refreshManifest() throws {
+    public func refreshManifest() throws {
         try updateManifest()
     }
 
@@ -436,7 +470,7 @@ class SlotStorage {
     /// ignored. Returns each cleared slot with its true mtime — the
     /// caller is expected to log it. A single manifest rebuild covers
     /// the whole sweep.
-    func clearExpired(olderThanSeconds: TimeInterval, enabledFloor: Date?, now: Date = Date()) throws -> [(slot: Int, mtime: Date)] {
+    public func clearExpired(olderThanSeconds: TimeInterval, enabledFloor: Date?, now: Date = Date()) throws -> [(slot: Int, mtime: Date)] {
         let locks = loadLocks()
         var labels = loadLabels()
         var cleared: [(slot: Int, mtime: Date)] = []
@@ -473,12 +507,12 @@ class SlotStorage {
         return cleared
     }
 
-    func getManifest() -> Manifest? {
+    public func getManifest() -> Manifest? {
         guard let data = try? Data(contentsOf: Paths.manifestFile) else { return nil }
         return try? JSONDecoder().decode(Manifest.self, from: data)
     }
 
-    func getMaxSlot() -> Int {
+    public func getMaxSlot() -> Int {
         slotCount
     }
 

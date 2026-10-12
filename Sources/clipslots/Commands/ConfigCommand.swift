@@ -1,4 +1,5 @@
 import ArgumentParser
+import ClipSlotsCore
 import Foundation
 
 struct ConfigCommand: ParsableCommand {
@@ -53,6 +54,7 @@ struct ConfigCommand: ParsableCommand {
         print(Style.sectionHeader("Keybinds"))
         print(Style.keyValue("Save:", config.keybinds.save, keyWidth: keyWidth))
         print(Style.keyValue("Paste:", config.keybinds.paste, keyWidth: keyWidth))
+        print(Style.keyValue("Popover:", config.keybinds.popover.isEmpty ? "off" : config.keybinds.popover, keyWidth: keyWidth))
         if config.keybinds.append.isEmpty {
             print(Style.keyValue("Append:", "off", keyWidth: keyWidth))
             print("")
