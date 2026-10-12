@@ -15,7 +15,7 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
-## [1.15.0] - 2026-10-11
+## [1.15.0] - 2026-10-12
 
 ### Added
 - **Menubar app (beta).** `ClipSlots.app` puts the slots in a menubar
