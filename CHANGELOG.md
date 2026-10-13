@@ -15,6 +15,14 @@ link reference at the bottom of the file. The release workflow
 and prepends it to the GitHub Release body. If the section is missing,
 the release ships with only install instructions.
 
+## [1.15.1] - 2026-10-13
+
+### Changed
+- Permission instructions now mention that newer macOS renamed
+  Privacy & Security → Accessibility to **Device Control and Data
+  Access**: the app's setup window, `clipslots permissions`, the daemon
+  warning, the README, the docs site and the release notes.
+
 ## [1.15.0] - 2026-10-12
 
 ### Added
@@ -364,6 +372,7 @@ Initial public release.
 - Universal binary (`arm64` + `x86_64`) shipped via `.pkg` and `.tar.gz`
   on every `v*` tag.
 
+[1.15.1]: https://github.com/olafglad/clipSlots/releases/tag/v1.15.1
 [1.15.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.15.0
 [1.14.0]: https://github.com/olafglad/clipSlots/releases/tag/v1.14.0
 [1.13.1]: https://github.com/olafglad/clipSlots/releases/tag/v1.13.1

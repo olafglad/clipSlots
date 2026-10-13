@@ -27,6 +27,7 @@ struct Permissions: ParsableCommand {
             print("")
             print("To grant permission:")
             print("1. Open System Settings > Privacy & Security > Accessibility")
+            print("   (called \"Device Control and Data Access\" on newer macOS)")
             print("2. Find \"clipslots\" in the list and toggle it ON")
             print("")
 

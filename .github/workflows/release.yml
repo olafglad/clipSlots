@@ -105,7 +105,7 @@ jobs:
 
             1. Download `ClipSlots-${{ steps.version.outputs.VERSION }}.pkg` below
             2. Double-click to install (if macOS warns about an unverified developer, right-click the file and choose **Open**)
-            3. The installer copies `clipslots` to `/usr/local/bin` and opens Accessibility settings
+            3. The installer copies `clipslots` to `/usr/local/bin` and opens Accessibility settings (called Device Control and Data Access on newer macOS)
             4. Toggle **clipslots** on in the Accessibility list
             5. Open Terminal and run `clipslots start`
 
@@ -133,7 +133,7 @@ jobs:
             1. Unzip and drag **ClipSlots.app** into Applications
             2. Open it. When macOS says it can't verify the developer, click **Done**
             3. Go to System Settings → Privacy & Security, scroll down, click **Open Anyway**
-            4. Follow the setup window to turn on Accessibility
+            4. Follow the setup window to turn on Accessibility (Device Control and Data Access on newer macOS)
 
             After updating to a newer beta, toggle ClipSlots off and on again under Accessibility (unsigned builds get a new identity each release).
           files: |

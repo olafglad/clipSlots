@@ -76,7 +76,7 @@ cp .build/release/clipslots ~/bin/
 
 A menubar popover over the same slots: browse, copy, paste, drag to swap, lock, label and peek images. Open it with **⌃⌥V** or the clipboard icon. It takes over the hotkeys from `clipslots start`; every CLI command keeps working against the same slots.
 
-**[Download `ClipSlots-app.zip`](https://github.com/olafglad/clipSlots/releases/latest/download/ClipSlots-app.zip)**, unzip, and move ClipSlots.app to Applications. It isn't notarized yet, so the first launch needs **System Settings → Privacy & Security → Open Anyway**. The setup window then walks you through Accessibility.
+**[Download `ClipSlots-app.zip`](https://github.com/olafglad/clipSlots/releases/latest/download/ClipSlots-app.zip)**, unzip, and move ClipSlots.app to Applications. It isn't notarized yet, so the first launch needs **System Settings → Privacy & Security → Open Anyway**. The setup window then walks you through Accessibility (called Device Control and Data Access on newer macOS).
 
 Build it yourself with `make app-install`.
 
