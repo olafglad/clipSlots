@@ -33,6 +33,7 @@ struct Daemon: ParsableCommand {
             print("WARNING: Accessibility permission not granted.")
             print("Hotkey save/paste will not work without it.")
             print("Grant access in System Settings > Privacy & Security > Accessibility")
+            print("(called \"Device Control and Data Access\" on newer macOS)")
         }
 
         var storage = try SlotStorage(slotCount: config.slots)

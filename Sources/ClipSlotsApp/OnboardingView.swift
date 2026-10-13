@@ -88,7 +88,7 @@ struct OnboardingView: View {
                     .font(Theme.mono(11))
                     .foregroundColor(Theme.textSecondary)
             }
-            Text("Turn on ClipSlots under Privacy & Security → Accessibility. This window closes on its own once it's on.")
+            Text("Turn on ClipSlots under Privacy & Security → Accessibility (Device Control and Data Access on newer macOS). This window closes on its own once it's on.")
                 .font(Theme.mono(11.5))
                 .foregroundColor(Theme.textSecondary)
                 .lineSpacing(2)
